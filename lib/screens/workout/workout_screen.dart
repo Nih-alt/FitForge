@@ -154,15 +154,83 @@ const List<String> workoutCategories = [
 class WorkoutController extends GetxController {
   final selectedCategory = 'All'.obs;
 
+  // Advanced filter state (applied via bottom sheet)
+  final appliedDurations = <String>{}.obs;
+  final appliedDifficulties = <String>{}.obs;
+  final appliedCalories = <String>{}.obs;
+
   List<WorkoutData> get filteredWorkouts {
-    if (selectedCategory.value == 'All') return allWorkouts;
-    return allWorkouts
-        .where((w) => w.category == selectedCategory.value)
-        .toList();
+    var workouts = allWorkouts.toList();
+
+    // Category filter
+    if (selectedCategory.value != 'All') {
+      workouts =
+          workouts.where((w) => w.category == selectedCategory.value).toList();
+    }
+
+    // Duration filter
+    if (appliedDurations.isNotEmpty) {
+      workouts = workouts.where((w) {
+        for (final d in appliedDurations) {
+          if (d == '< 20 min' && w.minutes < 20) return true;
+          if (d == '20-30 min' && w.minutes >= 20 && w.minutes <= 30) {
+            return true;
+          }
+          if (d == '30-45 min' && w.minutes > 30 && w.minutes <= 45) {
+            return true;
+          }
+          if (d == '45+ min' && w.minutes > 45) return true;
+        }
+        return false;
+      }).toList();
+    }
+
+    // Difficulty filter
+    if (appliedDifficulties.isNotEmpty) {
+      workouts = workouts
+          .where((w) => appliedDifficulties.contains(w.difficulty))
+          .toList();
+    }
+
+    // Calorie filter
+    if (appliedCalories.isNotEmpty) {
+      workouts = workouts.where((w) {
+        for (final c in appliedCalories) {
+          if (c == '< 200 kcal' && w.calories < 200) return true;
+          if (c == '200-300 kcal' && w.calories >= 200 && w.calories <= 300) {
+            return true;
+          }
+          if (c == '300+ kcal' && w.calories > 300) return true;
+        }
+        return false;
+      }).toList();
+    }
+
+    return workouts;
   }
 
-  void selectCategory(String category) =>
-      selectedCategory.value = category;
+  void selectCategory(String category) => selectedCategory.value = category;
+
+  void applyFilters(
+    Set<String> durations,
+    Set<String> difficulties,
+    Set<String> calories,
+  ) {
+    appliedDurations.assignAll(durations);
+    appliedDifficulties.assignAll(difficulties);
+    appliedCalories.assignAll(calories);
+  }
+
+  void resetFilters() {
+    appliedDurations.clear();
+    appliedDifficulties.clear();
+    appliedCalories.clear();
+  }
+
+  bool get hasActiveFilters =>
+      appliedDurations.isNotEmpty ||
+      appliedDifficulties.isNotEmpty ||
+      appliedCalories.isNotEmpty;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -220,13 +288,30 @@ class WorkoutScreen extends StatelessWidget {
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      CupertinoIcons.slider_horizontal_3,
-                      color: AppColors.accentOrange,
-                      size: 22,
-                    ),
+                  child: Stack(
+                    children: [
+                      IconButton(
+                        onPressed: () => _showFilterSheet(context, c),
+                        icon: const Icon(
+                          CupertinoIcons.slider_horizontal_3,
+                          color: AppColors.accentOrange,
+                          size: 22,
+                        ),
+                      ),
+                      if (c.hasActiveFilters)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppColors.accentGold,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -280,7 +365,12 @@ class WorkoutScreen extends StatelessWidget {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               sliver: SliverList(
-                key: ValueKey(c.selectedCategory.value),
+                key: ValueKey(
+                  '${c.selectedCategory.value}_'
+                  '${c.appliedDurations.join()}_'
+                  '${c.appliedDifficulties.join()}_'
+                  '${c.appliedCalories.join()}',
+                ),
                 delegate: SliverChildBuilderDelegate(
                   (ctx, index) {
                     final workout = filtered[index];
@@ -320,6 +410,294 @@ class WorkoutScreen extends StatelessWidget {
           ],
         );
       }),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  FILTER BOTTOM SHEET — Premium CupertinoModalPopup
+// ════════════════════════════════════════════════════════════════════════════
+
+void _showFilterSheet(BuildContext context, WorkoutController c) {
+  showCupertinoModalPopup(
+    context: context,
+    builder: (_) => _FilterBottomSheet(controller: c),
+  );
+}
+
+class _FilterBottomSheet extends StatefulWidget {
+  const _FilterBottomSheet({required this.controller});
+  final WorkoutController controller;
+
+  @override
+  State<_FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<_FilterBottomSheet> {
+  static const _durationOptions = ['< 20 min', '20-30 min', '30-45 min', '45+ min'];
+  static const _difficultyOptions = ['Beginner', 'Intermediate', 'Advanced'];
+  static const _calorieOptions = ['< 200 kcal', '200-300 kcal', '300+ kcal'];
+
+  late final Set<String> _durations;
+  late final Set<String> _difficulties;
+  late final Set<String> _calories;
+
+  @override
+  void initState() {
+    super.initState();
+    _durations = {...widget.controller.appliedDurations};
+    _difficulties = {...widget.controller.appliedDifficulties};
+    _calories = {...widget.controller.appliedCalories};
+  }
+
+  void _toggle(Set<String> set, String value) {
+    setState(() {
+      if (set.contains(value)) {
+        set.remove(value);
+      } else {
+        set.add(value);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.72,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF1A1A27),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Drag handle ──────────────────────────────────────────
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSecondaryDark.withAlpha(80),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // ── Header ───────────────────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Filter Workouts',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.white,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.accentOrange.withAlpha(20),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.xmark,
+                        color: AppColors.accentOrange,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // ── Duration ─────────────────────────────────────────────
+              _filterSectionLabel('Duration'),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _durationOptions
+                    .map((o) => _FilterPill(
+                          label: o,
+                          isSelected: _durations.contains(o),
+                          onTap: () => _toggle(_durations, o),
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 22),
+
+              // ── Difficulty ───────────────────────────────────────────
+              _filterSectionLabel('Difficulty'),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _difficultyOptions
+                    .map((o) => _FilterPill(
+                          label: o,
+                          isSelected: _difficulties.contains(o),
+                          onTap: () => _toggle(_difficulties, o),
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 22),
+
+              // ── Calories ─────────────────────────────────────────────
+              _filterSectionLabel('Calories Burned'),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _calorieOptions
+                    .map((o) => _FilterPill(
+                          label: o,
+                          isSelected: _calories.contains(o),
+                          onTap: () => _toggle(_calories, o),
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 28),
+
+              // ── Bottom buttons ───────────────────────────────────────
+              Row(
+                children: [
+                  // Reset
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        widget.controller.resetFilters();
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.accentOrange),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Reset',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  // Apply Filters
+                  Expanded(
+                    flex: 2,
+                    child: GestureDetector(
+                      onTap: () {
+                        widget.controller.applyFilters(
+                          _durations,
+                          _difficulties,
+                          _calories,
+                        );
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.accentGradient,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentOrange.withAlpha(60),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Apply Filters',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _filterSectionLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.poppins(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: AppColors.white,
+      ),
+    );
+  }
+}
+
+// ── Filter pill — selectable chip with gradient highlight ─────────────────
+
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: isSelected ? AppColors.accentGradient : null,
+          color: isSelected ? null : AppColors.backgroundDark,
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected
+              ? null
+              : Border.all(color: AppColors.cardBorderDark),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? AppColors.white : AppColors.textSecondaryDark,
+          ),
+        ),
+      ),
     );
   }
 }
