@@ -1,6 +1,6 @@
 /// API key constants for FitForge.
 ///
-/// Get your Gemini API key from https://aistudio.google.com/app/apikey
+/// Get free API key from: https://aistudio.google.com/app/apikey
 abstract final class ApiKeys {
-  static const String geminiApiKey = 'AIzaSyC3dHXpS5eOT18p9zFCoX4sDWTLCdZWPaA';
+  static const String geminiApiKey = 'AIzaSyAP4nv3aYFm3ANipQVj2EDjbsD8Rww-FNg';
 }

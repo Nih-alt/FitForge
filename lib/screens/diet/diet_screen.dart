@@ -1079,7 +1079,9 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
+      height: (MediaQuery.of(context).size.height * 0.75 -
+              MediaQuery.of(context).viewInsets.bottom)
+          .clamp(300.0, double.infinity),
       decoration: const BoxDecoration(
         color: AppColors.cardDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

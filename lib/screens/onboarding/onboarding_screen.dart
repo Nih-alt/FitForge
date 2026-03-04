@@ -307,8 +307,10 @@ class _BodyStatsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(28, 0, 28, keyboardHeight + 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -335,7 +337,7 @@ class _BodyStatsPage extends StatelessWidget {
             ),
           ).animate(delay: 200.ms).fadeIn(duration: 400.ms),
 
-          const Spacer(),
+          const SizedBox(height: 48),
 
           // ── Weight Stepper ───────────────────────────────────────────
           Obx(() => _StatStepper(
@@ -369,8 +371,6 @@ class _BodyStatsPage extends StatelessWidget {
               .animate(delay: 450.ms)
               .fadeIn(duration: 500.ms)
               .slideY(begin: 0.15),
-
-          const Spacer(flex: 2),
         ],
       ),
     );
@@ -949,7 +949,7 @@ class _StatStepperState extends State<_StatStepper> {
               errorBorder: InputBorder.none,
               focusedErrorBorder: InputBorder.none,
               filled: true,
-              fillColor: AppColors.cardDark,
+              fillColor: Colors.transparent,
               contentPadding: EdgeInsets.zero,
               isDense: true,
             ),
