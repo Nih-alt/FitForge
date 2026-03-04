@@ -4,7 +4,10 @@
       "Bash(flutter pub get:*)",
       "Bash(dir:*)",
       "Bash(flutter build:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(npm update:*)",
+      "Bash(xargs grep:*)",
+      "Bash(./gradlew assembleDebug:*)"
     ]
   }
 }

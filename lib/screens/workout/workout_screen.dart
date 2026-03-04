@@ -462,6 +462,13 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.72,

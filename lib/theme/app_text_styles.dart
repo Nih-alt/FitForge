@@ -12,6 +12,7 @@ abstract final class AppTextStyles {
         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
         height: 1.25,
         letterSpacing: -0.5,
+        decoration: TextDecoration.none,
       );
 
   static TextStyle displayMedium({bool isDark = true}) => GoogleFonts.poppins(
@@ -20,6 +21,7 @@ abstract final class AppTextStyles {
         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
         height: 1.33,
         letterSpacing: -0.3,
+        decoration: TextDecoration.none,
       );
 
   // ── Heading ──────────────────────────────────────────────────────────
@@ -29,6 +31,7 @@ abstract final class AppTextStyles {
         fontWeight: FontWeight.w600,
         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
         height: 1.4,
+        decoration: TextDecoration.none,
       );
 
   // ── Body ─────────────────────────────────────────────────────────────
@@ -38,6 +41,7 @@ abstract final class AppTextStyles {
         fontWeight: FontWeight.w400,
         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
         height: 1.5,
+        decoration: TextDecoration.none,
       );
 
   static TextStyle bodyMedium({bool isDark = true}) => GoogleFonts.inter(
@@ -45,6 +49,7 @@ abstract final class AppTextStyles {
         fontWeight: FontWeight.w400,
         color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
         height: 1.57,
+        decoration: TextDecoration.none,
       );
 
   // ── Label ────────────────────────────────────────────────────────────
@@ -55,6 +60,7 @@ abstract final class AppTextStyles {
         color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
         height: 1.33,
         letterSpacing: 0.2,
+        decoration: TextDecoration.none,
       );
 
   // ── Button ───────────────────────────────────────────────────────────
@@ -65,5 +71,6 @@ abstract final class AppTextStyles {
         color: AppColors.white,
         height: 1.25,
         letterSpacing: 0.3,
+        decoration: TextDecoration.none,
       );
 }

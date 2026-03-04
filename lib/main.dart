@@ -64,6 +64,15 @@ class FitForgeApp extends StatelessWidget {
       // ── Navigation ─────────────────────────────────────────────────
       defaultTransition: Transition.cupertino,
       home: const SplashScreen(),
+
+      // ── Global text decoration reset ───────────────────────────────
+      // Prevents yellow underlines that appear when Text widgets are
+      // rendered inside Cupertino overlays (showCupertinoModalPopup)
+      // which run outside the normal Material widget tree.
+      builder: (context, child) => DefaultTextStyle.merge(
+        style: const TextStyle(decoration: TextDecoration.none),
+        child: child!,
+      ),
     );
   }
 }

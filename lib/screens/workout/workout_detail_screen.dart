@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import 'active_workout_screen.dart';
 import 'workout_screen.dart';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -135,7 +136,16 @@ class WorkoutDetailScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                 child: GradientButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => ActiveWorkoutScreen(
+                          workoutName: workout.name,
+                          exercises: exercises,
+                        ),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Start Workout',
                     style: GoogleFonts.poppins(
@@ -324,7 +334,7 @@ class _ExerciseCard extends StatelessWidget {
   });
 
   final int number;
-  final _ExerciseInfo exercise;
+  final ExerciseInfo exercise;
 
   @override
   Widget build(BuildContext context) {
@@ -412,8 +422,8 @@ class _ExerciseCard extends StatelessWidget {
 //  EXERCISE DATA — Placeholder exercises per workout
 // ════════════════════════════════════════════════════════════════════════════
 
-class _ExerciseInfo {
-  const _ExerciseInfo({
+class ExerciseInfo {
+  const ExerciseInfo({
     required this.name,
     required this.setsReps,
     required this.muscleGroup,
@@ -424,7 +434,7 @@ class _ExerciseInfo {
   final String muscleGroup;
 }
 
-List<_ExerciseInfo> _exercisesFor(String workoutName) {
+List<ExerciseInfo> _exercisesFor(String workoutName) {
   return _exerciseMap[workoutName] ?? _exerciseMap['default']!;
 }
 
@@ -450,63 +460,63 @@ const _descriptionMap = <String, String>{
       'An all-out compound workout hitting every major muscle group. Designed to maximize calorie burn and build functional strength.',
 };
 
-const _exerciseMap = <String, List<_ExerciseInfo>>{
+const _exerciseMap = <String, List<ExerciseInfo>>{
   'Upper Body Blast': [
-    _ExerciseInfo(name: 'Bench Press', setsReps: '4 x 10', muscleGroup: 'Chest'),
-    _ExerciseInfo(name: 'Shoulder Press', setsReps: '3 x 12', muscleGroup: 'Shoulders'),
-    _ExerciseInfo(name: 'Bicep Curls', setsReps: '3 x 15', muscleGroup: 'Arms'),
-    _ExerciseInfo(name: 'Tricep Dips', setsReps: '3 x 12', muscleGroup: 'Arms'),
-    _ExerciseInfo(name: 'Lat Pulldown', setsReps: '4 x 10', muscleGroup: 'Back'),
-    _ExerciseInfo(name: 'Push-ups', setsReps: '3 x 15', muscleGroup: 'Chest'),
+    ExerciseInfo(name: 'Bench Press', setsReps: '4 x 10', muscleGroup: 'Chest'),
+    ExerciseInfo(name: 'Shoulder Press', setsReps: '3 x 12', muscleGroup: 'Shoulders'),
+    ExerciseInfo(name: 'Bicep Curls', setsReps: '3 x 15', muscleGroup: 'Arms'),
+    ExerciseInfo(name: 'Tricep Dips', setsReps: '3 x 12', muscleGroup: 'Arms'),
+    ExerciseInfo(name: 'Lat Pulldown', setsReps: '4 x 10', muscleGroup: 'Back'),
+    ExerciseInfo(name: 'Push-ups', setsReps: '3 x 15', muscleGroup: 'Chest'),
   ],
   'Morning Cardio Rush': [
-    _ExerciseInfo(name: 'Jumping Jacks', setsReps: '3 x 30s', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'High Knees', setsReps: '4 x 20s', muscleGroup: 'Legs'),
-    _ExerciseInfo(name: 'Burpees', setsReps: '3 x 10', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Mountain Climbers', setsReps: '3 x 30s', muscleGroup: 'Core'),
-    _ExerciseInfo(name: 'Jump Rope', setsReps: '3 x 60s', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Jumping Jacks', setsReps: '3 x 30s', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'High Knees', setsReps: '4 x 20s', muscleGroup: 'Legs'),
+    ExerciseInfo(name: 'Burpees', setsReps: '3 x 10', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Mountain Climbers', setsReps: '3 x 30s', muscleGroup: 'Core'),
+    ExerciseInfo(name: 'Jump Rope', setsReps: '3 x 60s', muscleGroup: 'Full Body'),
   ],
   'Core & Abs Shred': [
-    _ExerciseInfo(name: 'Crunches', setsReps: '4 x 20', muscleGroup: 'Core'),
-    _ExerciseInfo(name: 'Plank Hold', setsReps: '3 x 45s', muscleGroup: 'Core'),
-    _ExerciseInfo(name: 'Russian Twists', setsReps: '3 x 20', muscleGroup: 'Obliques'),
-    _ExerciseInfo(name: 'Leg Raises', setsReps: '4 x 15', muscleGroup: 'Lower Abs'),
-    _ExerciseInfo(name: 'Bicycle Crunches', setsReps: '3 x 20', muscleGroup: 'Core'),
+    ExerciseInfo(name: 'Crunches', setsReps: '4 x 20', muscleGroup: 'Core'),
+    ExerciseInfo(name: 'Plank Hold', setsReps: '3 x 45s', muscleGroup: 'Core'),
+    ExerciseInfo(name: 'Russian Twists', setsReps: '3 x 20', muscleGroup: 'Obliques'),
+    ExerciseInfo(name: 'Leg Raises', setsReps: '4 x 15', muscleGroup: 'Lower Abs'),
+    ExerciseInfo(name: 'Bicycle Crunches', setsReps: '3 x 20', muscleGroup: 'Core'),
   ],
   'Full Body HIIT': [
-    _ExerciseInfo(name: 'Burpees', setsReps: '4 x 10', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Squat Jumps', setsReps: '4 x 15', muscleGroup: 'Legs'),
-    _ExerciseInfo(name: 'Push-up Variations', setsReps: '3 x 12', muscleGroup: 'Chest'),
-    _ExerciseInfo(name: 'Lunges', setsReps: '3 x 12', muscleGroup: 'Legs'),
-    _ExerciseInfo(name: 'Plank Jacks', setsReps: '3 x 20', muscleGroup: 'Core'),
-    _ExerciseInfo(name: 'Box Jumps', setsReps: '4 x 10', muscleGroup: 'Legs'),
+    ExerciseInfo(name: 'Burpees', setsReps: '4 x 10', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Squat Jumps', setsReps: '4 x 15', muscleGroup: 'Legs'),
+    ExerciseInfo(name: 'Push-up Variations', setsReps: '3 x 12', muscleGroup: 'Chest'),
+    ExerciseInfo(name: 'Lunges', setsReps: '3 x 12', muscleGroup: 'Legs'),
+    ExerciseInfo(name: 'Plank Jacks', setsReps: '3 x 20', muscleGroup: 'Core'),
+    ExerciseInfo(name: 'Box Jumps', setsReps: '4 x 10', muscleGroup: 'Legs'),
   ],
   'Flexibility Flow': [
-    _ExerciseInfo(name: 'Cat-Cow Stretch', setsReps: '3 x 30s', muscleGroup: 'Back'),
-    _ExerciseInfo(name: 'Downward Dog', setsReps: '3 x 30s', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Pigeon Pose', setsReps: '2 x 45s', muscleGroup: 'Hips'),
-    _ExerciseInfo(name: 'Seated Forward Fold', setsReps: '3 x 30s', muscleGroup: 'Hamstrings'),
-    _ExerciseInfo(name: 'Spinal Twist', setsReps: '2 x 30s', muscleGroup: 'Back'),
+    ExerciseInfo(name: 'Cat-Cow Stretch', setsReps: '3 x 30s', muscleGroup: 'Back'),
+    ExerciseInfo(name: 'Downward Dog', setsReps: '3 x 30s', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Pigeon Pose', setsReps: '2 x 45s', muscleGroup: 'Hips'),
+    ExerciseInfo(name: 'Seated Forward Fold', setsReps: '3 x 30s', muscleGroup: 'Hamstrings'),
+    ExerciseInfo(name: 'Spinal Twist', setsReps: '2 x 30s', muscleGroup: 'Back'),
   ],
   'Active Recovery': [
-    _ExerciseInfo(name: 'Foam Rolling', setsReps: '5 x 60s', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Light Walking', setsReps: '1 x 5min', muscleGroup: 'Legs'),
-    _ExerciseInfo(name: 'Gentle Stretching', setsReps: '4 x 30s', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Deep Breathing', setsReps: '3 x 60s', muscleGroup: 'Core'),
-    _ExerciseInfo(name: 'Yoga Flow', setsReps: '1 x 5min', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Foam Rolling', setsReps: '5 x 60s', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Light Walking', setsReps: '1 x 5min', muscleGroup: 'Legs'),
+    ExerciseInfo(name: 'Gentle Stretching', setsReps: '4 x 30s', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Deep Breathing', setsReps: '3 x 60s', muscleGroup: 'Core'),
+    ExerciseInfo(name: 'Yoga Flow', setsReps: '1 x 5min', muscleGroup: 'Full Body'),
   ],
   'Full Body Burn': [
-    _ExerciseInfo(name: 'Squat to Press', setsReps: '4 x 12', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Deadlifts', setsReps: '4 x 10', muscleGroup: 'Back & Legs'),
-    _ExerciseInfo(name: 'Push-up to Row', setsReps: '3 x 12', muscleGroup: 'Chest & Back'),
-    _ExerciseInfo(name: 'Walking Lunges', setsReps: '3 x 16', muscleGroup: 'Legs'),
-    _ExerciseInfo(name: 'Plank to Push-up', setsReps: '3 x 10', muscleGroup: 'Core & Arms'),
-    _ExerciseInfo(name: 'Kettlebell Swings', setsReps: '4 x 15', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Squat to Press', setsReps: '4 x 12', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Deadlifts', setsReps: '4 x 10', muscleGroup: 'Back & Legs'),
+    ExerciseInfo(name: 'Push-up to Row', setsReps: '3 x 12', muscleGroup: 'Chest & Back'),
+    ExerciseInfo(name: 'Walking Lunges', setsReps: '3 x 16', muscleGroup: 'Legs'),
+    ExerciseInfo(name: 'Plank to Push-up', setsReps: '3 x 10', muscleGroup: 'Core & Arms'),
+    ExerciseInfo(name: 'Kettlebell Swings', setsReps: '4 x 15', muscleGroup: 'Full Body'),
   ],
   'default': [
-    _ExerciseInfo(name: 'Warm-up', setsReps: '1 x 5min', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Main Exercise', setsReps: '4 x 12', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Accessory Work', setsReps: '3 x 15', muscleGroup: 'Full Body'),
-    _ExerciseInfo(name: 'Cool-down', setsReps: '1 x 5min', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Warm-up', setsReps: '1 x 5min', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Main Exercise', setsReps: '4 x 12', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Accessory Work', setsReps: '3 x 15', muscleGroup: 'Full Body'),
+    ExerciseInfo(name: 'Cool-down', setsReps: '1 x 5min', muscleGroup: 'Full Body'),
   ],
 };

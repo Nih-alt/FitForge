@@ -56,6 +56,12 @@ dependencies:
   # UI
   smooth_page_indicator: ^1.2.0+3
 
+  # Scanner & AI
+  mobile_scanner: ^5.0.0
+  camera: ^0.11.1
+  google_generative_ai: ^0.4.6
+  image_picker: ^1.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

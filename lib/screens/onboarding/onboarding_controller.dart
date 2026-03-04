@@ -147,8 +147,10 @@ class OnboardingController extends GetxController {
   Future<void> _saveAndFinish() async {
     final box = Hive.box('user_profile');
     await box.putAll({
-      'name': nameController.text.trim(),
-      'age': calculatedAge!,
+      'name': nameController.text.trim().isEmpty
+          ? 'Athlete'
+          : nameController.text.trim(),
+      'age': calculatedAge ?? 0,
       'weight': weight.value,
       'height': height.value,
       'goal': selectedGoal.value,

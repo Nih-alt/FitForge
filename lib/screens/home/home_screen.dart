@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../theme/app_colors.dart';
+import '../diet/diet_screen.dart';
 import '../workout/workout_screen.dart';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -32,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: const [
           _HomeDashboard(),
           WorkoutScreen(),
-          _PlaceholderTab(label: 'Diet'),
+          DietScreen(),
           _PlaceholderTab(label: 'Progress'),
           _PlaceholderTab(label: 'Profile'),
         ],
