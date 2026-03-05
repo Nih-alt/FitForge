@@ -55,6 +55,7 @@ dependencies:
 
   # UI
   smooth_page_indicator: ^1.2.0+3
+  fl_chart: ^0.70.2
 
   # Scanner & AI
   mobile_scanner: ^5.0.0

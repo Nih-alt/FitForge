@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'controllers/theme_controller.dart';
 import 'screens/splash/splash_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -43,6 +44,8 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  Get.put(ThemeController());
 
   runApp(const FitForgeApp());
 }

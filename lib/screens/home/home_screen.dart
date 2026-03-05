@@ -8,6 +8,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../theme/app_colors.dart';
 import '../diet/diet_screen.dart';
+import '../profile/profile_screen.dart';
+import '../progress/progress_screen.dart';
 import '../workout/workout_screen.dart';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -34,8 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
           _HomeDashboard(),
           WorkoutScreen(),
           DietScreen(),
-          _PlaceholderTab(label: 'Progress'),
-          _PlaceholderTab(label: 'Profile'),
+          ProgressScreen(),
+          ProfileScreen(),
         ],
       ),
       bottomNavigationBar: _buildBottomNav(),
@@ -849,26 +851,3 @@ class _MotivationalBanner extends StatelessWidget {
   }
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-//  PLACEHOLDER TAB — for Workout, Diet, Progress, Profile
-// ════════════════════════════════════════════════════════════════════════════
-
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        label,
-        style: GoogleFonts.poppins(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textSecondaryDark,
-        ),
-      ),
-    );
-  }
-}
