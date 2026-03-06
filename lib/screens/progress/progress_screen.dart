@@ -203,7 +203,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               .fadeIn(duration: 500.ms)
               .slideY(begin: 0.15, curve: Curves.easeOut),
           const SizedBox(height: 20),
-          _ActivityCalendar(onCellTap: _showActivityDetail)
+          const _ActivityCalendar()
               .animate(delay: 200.ms)
               .fadeIn(duration: 500.ms)
               .slideY(begin: 0.15, curve: Curves.easeOut),
@@ -319,149 +319,6 @@ class _ProgressScreenState extends State<ProgressScreen>
   // ==========================================================================
   //  INTERACTION HANDLERS
   // ==========================================================================
-
-  // -- Activity calendar cell tap --
-  void _showActivityDetail(DateTime date, int activityLevel) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final workoutCtrl = Get.find<WorkoutController>();
-    const dayNames = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-      'Friday', 'Saturday', 'Sunday',
-    ];
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    final dateStr =
-        '${dayNames[date.weekday - 1]}, ${date.day} ${monthNames[date.month - 1]}';
-    final dayLogs = workoutCtrl.workoutLogs
-        .where((log) =>
-            log.date.year == date.year &&
-            log.date.month == date.month &&
-            log.date.day == date.day)
-        .toList();
-    final totalDurationMinutes =
-        dayLogs.fold<int>(0, (sum, log) => sum + log.durationSeconds) ~/
-            60;
-    final totalCalories =
-        dayLogs.fold<int>(0, (sum, log) => sum + log.caloriesBurned);
-    final workoutNames = dayLogs.isEmpty
-        ? 'Rest day'
-        : dayLogs.map((log) => log.workoutName).join(', ');
-
-    showCupertinoModalPopup(
-      context: context,
-      builder: (_) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: theme.cardTheme.color,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      dateStr,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(CupertinoIcons.xmark_circle_fill,
-                        color: AppColors.accentOrange, size: 24),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              if (activityLevel == 0) ...[
-                Text('\u{1F634}',
-                    style: GoogleFonts.poppins(fontSize: 48)),
-                const SizedBox(height: 12),
-                Text(
-                  'Rest Day',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Recovery is part of the journey',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                  ),
-                ),
-              ] else ...[
-                _sheetStatRow(CupertinoIcons.flame_fill, 'Workout',
-                    workoutNames),
-                const SizedBox(height: 12),
-                _sheetStatRow(CupertinoIcons.timer, 'Duration',
-                    '$totalDurationMinutes min'),
-                const SizedBox(height: 12),
-                _sheetStatRow(CupertinoIcons.bolt_fill, 'Calories',
-                    '$totalCalories kcal'),
-                const SizedBox(height: 12),
-                _sheetStatRow(
-                    CupertinoIcons.list_bullet, 'Workouts', '${dayLogs.length}'),
-              ],
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _sheetStatRow(IconData icon, String label, String value) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.accentOrange, size: 18),
-          const SizedBox(width: 12),
-          Text(label,
-              style: GoogleFonts.inter(
-                  fontSize: 14, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
-          const Spacer(),
-          Text(value,
-              style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface)),
-        ],
-      ),
-    );
-  }
 
   // -- Update measurements sheet --
   void _showUpdateMeasurementsSheet() {
@@ -1481,106 +1338,108 @@ class _StreakCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final workoutCtrl = Get.find<WorkoutController>();
 
-    return Obx(() {
-      final streak = workoutCtrl.currentStreak.value;
-      final longest = workoutCtrl.calculateLongestStreak();
-
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: theme.cardTheme.color,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            width: 1.5,
-            color: AppColors.accentOrange.withAlpha(60),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accentOrange.withAlpha(30),
-              blurRadius: 40,
-              offset: const Offset(0, 12),
-            ),
-          ],
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          width: 1.5,
+          color: AppColors.accentOrange.withAlpha(60),
         ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accentOrange.withAlpha(60),
-                                  blurRadius: 30,
-                                  spreadRadius: 5,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text('\u{1F525}',
-                              style: GoogleFonts.poppins(fontSize: 40)),
-                        ],
-                      ),
-                      const SizedBox(width: 8),
-                      TweenAnimationBuilder<int>(
-                        tween: IntTween(begin: 0, end: streak),
-                        duration: const Duration(milliseconds: 1200),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, value, _) {
-                          return ShaderMask(
-                            shaderCallback: (bounds) =>
-                                AppColors.accentGradient.createShader(bounds),
-                            child: Text('$value',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.white,
-                                  height: 1,
-                                )),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.accentOrange.withAlpha(30),
+            blurRadius: 40,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Row(
                   children: [
-                    Text('Day Streak',
-                        style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.onSurface)),
-                    const SizedBox(height: 2),
-                    Text(streak == 0 ? 'Start your streak!' : 'Keep it going!',
-                        style: GoogleFonts.inter(
-                            fontSize: 13, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accentOrange.withAlpha(60),
+                                blurRadius: 30,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text('\u{1F525}',
+                            style: GoogleFonts.poppins(fontSize: 40)),
+                      ],
+                    ),
+                    const SizedBox(width: 8),
+                    Obx(() => TweenAnimationBuilder<int>(
+                      tween: IntTween(begin: 0, end: workoutCtrl.currentStreak.value),
+                      duration: const Duration(milliseconds: 1200),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, _) {
+                        return ShaderMask(
+                          shaderCallback: (bounds) =>
+                              AppColors.accentGradient.createShader(bounds),
+                          child: Text('$value',
+                              style: GoogleFonts.poppins(
+                                fontSize: 48,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.white,
+                                height: 1,
+                              )),
+                        );
+                      },
+                    )),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Longest streak: $longest days',
-                  style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.accentOrange)),
-            ),
-          ],
-        ),
-      );
-    });
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('Day Streak',
+                      style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface)),
+                  const SizedBox(height: 2),
+                  Obx(() => Text(
+                      workoutCtrl.currentStreak.value == 0
+                          ? 'Start your streak!'
+                          : 'Keep it going!',
+                      style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight))),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Obx(() => Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+                'Longest streak: ${workoutCtrl.calculateLongestStreak()} days',
+                style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.accentOrange)),
+          )),
+        ],
+      ),
+    );
   }
 }
 
@@ -1607,50 +1466,44 @@ class _WeeklySummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final workoutCtrl = Get.find<WorkoutController>();
 
-    return Obx(() {
-      final workouts = workoutCtrl.weeklyWorkoutsCompleted.value;
-      final calories = workoutCtrl.totalCaloriesBurned.value;
-      final activeTime = workoutCtrl.totalActiveTime.value;
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('This Week',
-              style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurface)),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                  child: _SummaryStatCard(
-                      icon: CupertinoIcons.flame_fill,
-                      iconColor: AppColors.accentOrange,
-                      value: '$workouts',
-                      label: 'completed',
-                      title: 'Workouts')),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: _SummaryStatCard(
-                      icon: CupertinoIcons.bolt_fill,
-                      iconColor: AppColors.accentGold,
-                      value: _formatCalories(calories),
-                      label: 'burned',
-                      title: 'Calories')),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: _SummaryStatCard(
-                      icon: CupertinoIcons.timer,
-                      iconColor: AppColors.success,
-                      value: activeTime,
-                      label: 'total',
-                      title: 'Active Time')),
-            ],
-          ),
-        ],
-      );
-    });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('This Week',
+            style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface)),
+        const SizedBox(height: 14),
+        Obx(() => Row(
+          children: [
+            Expanded(
+                child: _SummaryStatCard(
+                    icon: CupertinoIcons.flame_fill,
+                    iconColor: AppColors.accentOrange,
+                    value: '${workoutCtrl.weeklyWorkoutsCompleted.value}',
+                    label: 'completed',
+                    title: 'Workouts')),
+            const SizedBox(width: 10),
+            Expanded(
+                child: _SummaryStatCard(
+                    icon: CupertinoIcons.bolt_fill,
+                    iconColor: AppColors.accentGold,
+                    value: _formatCalories(workoutCtrl.totalCaloriesBurned.value),
+                    label: 'burned',
+                    title: 'Calories')),
+            const SizedBox(width: 10),
+            Expanded(
+                child: _SummaryStatCard(
+                    icon: CupertinoIcons.timer,
+                    iconColor: AppColors.success,
+                    value: workoutCtrl.totalActiveTime.value,
+                    label: 'total',
+                    title: 'Active Time')),
+          ],
+        )),
+      ],
+    );
   }
 }
 
@@ -1719,26 +1572,29 @@ class _SummaryStatCard extends StatelessWidget {
 // ============================================================================
 
 class _ActivityCalendar extends StatelessWidget {
-  const _ActivityCalendar({required this.onCellTap});
+  const _ActivityCalendar();
 
-  final void Function(DateTime date, int level) onCellTap;
+  static const _dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-  static const _weeks = 10;
-  static const _daysPerWeek = 7;
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
-  Color _activityColor(int level, BuildContext context) {
-    switch (level) {
-      case 0:
-        return const Color(0xFF1A1A27);
-      case 1:
-        return const Color(0x40FF6B35);
-      case 2:
-        return const Color(0x80FF6B35);
-      case 3:
-        return const Color(0xFFFF6B35);
-      default:
-        return const Color(0xFF1A1A27);
+  static WorkoutLogModel? _logForDay(
+      List<WorkoutLogModel> logs, DateTime day) {
+    for (final log in logs) {
+      if (_isSameDay(log.date, day)) return log;
     }
+    return null;
+  }
+
+  static void _showDayDetail(
+      BuildContext context, DateTime day, WorkoutLogModel? log) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _DayDetailSheet(date: day, log: log),
+    );
   }
 
   String get _monthYear {
@@ -1758,11 +1614,15 @@ class _ActivityCalendar extends StatelessWidget {
 
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    final startDate = todayDate.subtract(const Duration(days: 69));
 
-    return Obx(() => Column(
+    // 70 days ending today: days[0] = 69 days ago, days[69] = today
+    final days = List.generate(
+        70, (i) => todayDate.subtract(Duration(days: 69 - i)));
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ── Section header ────────────────────────────────────────────────
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1775,7 +1635,9 @@ class _ActivityCalendar extends StatelessWidget {
                 style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight)),
           ],
         ),
         const SizedBox(height: 14),
@@ -1784,72 +1646,112 @@ class _ActivityCalendar extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+            border: Border.all(
+                color: isDark
+                    ? AppColors.cardBorderDark
+                    : AppColors.cardBorderLight),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final cellSize =
-                      (constraints.maxWidth - (_weeks - 1) * 4) / _weeks;
-                  final clampedSize = cellSize.clamp(0.0, 16.0);
-
-                  return Column(
-                    children: List.generate(_daysPerWeek, (dayIndex) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                            bottom: dayIndex < _daysPerWeek - 1 ? 4 : 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: List.generate(_weeks, (weekIndex) {
-                            final dataIndex =
-                                weekIndex * _daysPerWeek + dayIndex;
-                            final cellDate = startDate.add(Duration(days: weekIndex * 7 + dayIndex));
-                            final isToday = cellDate.year == todayDate.year &&
-                                cellDate.month == todayDate.month &&
-                                cellDate.day == todayDate.day;
-                            final level = workoutCtrl.activityLevel(cellDate);
-
-                            return GestureDetector(
-                                onTap: () => onCellTap(cellDate, level),
-                              child: AnimatedContainer(
-                                duration: Duration(
-                                    milliseconds: 300 + dataIndex * 15),
-                                width: clampedSize,
-                                height: clampedSize,
-                                decoration: BoxDecoration(
-                                  color: _activityColor(level, context),
-                                  borderRadius: BorderRadius.circular(3),
-                                  border: isToday
-                                      ? Border.all(
-                                          color: AppColors.accentGold,
-                                          width: 1.5)
-                                      : null,
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      );
-                    }),
-                  );
-                },
+              // ── Day-of-week labels ────────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: _dayLabels
+                    .map((label) => SizedBox(
+                          width: 38,
+                          child: Text(label,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark
+                                      ? AppColors.textSecondaryDark
+                                      : AppColors.textSecondaryLight)),
+                        ))
+                    .toList(),
               ),
+              const SizedBox(height: 6),
+
+              // ── Calendar grid (reactive) ──────────────────────────────
+              // Access workoutLogs inside Obx so GetX registers the
+              // dependency during the build phase, not layout phase.
+              Obx(() {
+                final allLogs = workoutCtrl.workoutLogs.toList();
+                final dayLogs =
+                    days.map((d) => _logForDay(allLogs, d)).toList();
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 4,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: 70,
+                  itemBuilder: (ctx, i) {
+                    final day = days[i];
+                    final log = dayLogs[i];
+                    final isToday = _isSameDay(day, todayDate);
+
+                    final Color cellColor;
+                    if (log == null) {
+                      cellColor = const Color(0xFF2A2A3A);
+                    } else if (log.caloriesBurned < 150) {
+                      cellColor = const Color(0x55FF6B35);
+                    } else if (log.caloriesBurned < 300) {
+                      cellColor = const Color(0x99FF6B35);
+                    } else {
+                      cellColor = const Color(0xFFFF6B35);
+                    }
+
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => _showDayDetail(context, day, log),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: cellColor,
+                          borderRadius: BorderRadius.circular(4),
+                          border: isToday
+                              ? Border.all(
+                                  color: const Color(0xFFFFB800), width: 2)
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }),
+
               const SizedBox(height: 12),
+
+              // ── Legend ────────────────────────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('Less',
                       style: GoogleFonts.inter(
-                          fontSize: 10, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+                          fontSize: 10,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight)),
                   const SizedBox(width: 6),
-                  ...[0, 1, 2, 3].map((level) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                  ...[
+                    const Color(0xFF2A2A3A),
+                    const Color(0x55FF6B35),
+                    const Color(0x99FF6B35),
+                    const Color(0xFFFF6B35),
+                  ].map((c) => Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 2),
                         child: Container(
-                          width: 10,
-                          height: 10,
+                          width: 12,
+                          height: 12,
                           decoration: BoxDecoration(
-                            color: _activityColor(level, context),
+                            color: c,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -1857,14 +1759,178 @@ class _ActivityCalendar extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text('More',
                       style: GoogleFonts.inter(
-                          fontSize: 10, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+                          fontSize: 10,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight)),
                 ],
               ),
             ],
           ),
         ),
       ],
-    ));
+    );
+  }
+}
+
+// ============================================================================
+//  DAY DETAIL BOTTOM SHEET — shown when a calendar cell is tapped
+// ============================================================================
+
+class _DayDetailSheet extends StatelessWidget {
+  const _DayDetailSheet({required this.date, required this.log});
+
+  final DateTime date;
+  final WorkoutLogModel? log;
+
+  static String _formatDate(DateTime d) {
+    const days = [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+      'Friday', 'Saturday', 'Sunday',
+    ];
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return '${days[d.weekday - 1]}, ${d.day} ${months[d.month - 1]} ${d.year}';
+  }
+
+  static String _fmtDuration(int secs) {
+    final h = secs ~/ 3600;
+    final m = (secs % 3600) ~/ 60;
+    if (h > 0) return '${h}h ${m}m';
+    return m == 0 ? '${secs}s' : '${m}m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const bg = Color(0xFF1A1A27);
+    const cardBg = Color(0xFF0A0A0F);
+    const white = Color(0xFFFFFFFF);
+    const orange = Color(0xFFFF6B35);
+    const gold = Color(0xFFFFB800);
+    const green = Color(0xFF4CAF50);
+    const grey = Color(0xFF8A8A9A);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+      decoration: const BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: grey.withAlpha(60),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Date header + close button
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _formatDate(date),
+                    style: GoogleFonts.poppins(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: white),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(CupertinoIcons.xmark_circle_fill,
+                      color: orange, size: 24),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Content
+            if (log == null) ...[
+              const Center(
+                child: Text('😴',
+                    style: TextStyle(
+                        fontSize: 48, decoration: TextDecoration.none)),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: Text('Rest Day',
+                    style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: white)),
+              ),
+              const SizedBox(height: 4),
+              Center(
+                child: Text('Recovery is part of the journey',
+                    style: GoogleFonts.inter(fontSize: 14, color: grey)),
+              ),
+              const SizedBox(height: 8),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(log!.workoutName,
+                        style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: white)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _chip(CupertinoIcons.timer,
+                            _fmtDuration(log!.durationSeconds), orange),
+                        const SizedBox(width: 14),
+                        _chip(CupertinoIcons.flame_fill,
+                            '${log!.caloriesBurned} kcal', gold),
+                        const SizedBox(width: 14),
+                        _chip(CupertinoIcons.list_bullet,
+                            '${log!.exercisesCompleted} ex', green),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _chip(IconData icon, String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: color),
+        const SizedBox(width: 4),
+        Text(label,
+            style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFFB0B0C0))),
+      ],
+    );
   }
 }
 
@@ -2607,18 +2673,18 @@ class _WorkoutHistoryWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Obx(() {
-      if (logs.isEmpty) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Recent Workouts',
-                style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface)),
-            const SizedBox(height: 14),
-            Container(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Recent Workouts',
+            style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface)),
+        const SizedBox(height: 14),
+        Obx(() {
+          if (logs.isEmpty) {
+            return Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
               decoration: BoxDecoration(
@@ -2638,28 +2704,20 @@ class _WorkoutHistoryWidget extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.onSurface)),
                   const SizedBox(height: 4),
-                  Text('No workouts yet. Start your first workout!',
+                  Text('No workouts yet. Start your first workout! 💪',
                       style: GoogleFonts.inter(
                           fontSize: 13,
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                       textAlign: TextAlign.center),
                 ],
               ),
-            ),
-          ],
-        );
-      }
+            );
+          }
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Recent Workouts',
-              style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurface)),
-          const SizedBox(height: 14),
-          ...List.generate(logs.length, (i) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...List.generate(logs.length, (i) {
             final log = logs[i];
             final isLast = i == logs.length - 1;
             final dateStr = _formatRelativeDate(log.date);
@@ -2760,10 +2818,12 @@ class _WorkoutHistoryWidget extends StatelessWidget {
                 .animate(delay: Duration(milliseconds: 100 * i))
                 .fadeIn(duration: 400.ms)
                 .slideX(begin: 0.08, curve: Curves.easeOut);
-          }),
-        ],
-      );
-    });
+              }),
+            ],
+          );
+        }),
+      ],
+    );
   }
 
   Widget _chip(IconData icon, String text, BuildContext context) {

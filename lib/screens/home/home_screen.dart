@@ -291,7 +291,7 @@ class _AppBarRow extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════════════════
 
 class _DailyScoreCard extends StatelessWidget {
-  _DailyScoreCard();
+  const _DailyScoreCard();
 
   @override
   Widget build(BuildContext context) {
@@ -520,7 +520,7 @@ class _RingPainter extends CustomPainter {
 // ════════════════════════════════════════════════════════════════════════════
 
 class _TodaysWorkoutCard extends StatelessWidget {
-  _TodaysWorkoutCard();
+  const _TodaysWorkoutCard();
 
   @override
   Widget build(BuildContext context) {
@@ -790,7 +790,7 @@ class _QuickStatCard extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════════════════
 
 class _WeeklyProgress extends StatelessWidget {
-  _WeeklyProgress();
+  const _WeeklyProgress();
 
   static const _dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -800,8 +800,6 @@ class _WeeklyProgress extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final today = DateTime.now().weekday - 1; // 0 = Monday
     final workoutCtrl = Get.find<WorkoutController>();
-    final userCtrl = Get.find<UserController>();
-    final hive = Get.find<HiveService>();
 
     return Obx(() {
       final weeklyMap = workoutCtrl.weeklyActivityMap();
