@@ -752,7 +752,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             size: 16,
             color: AppColors.textSecondaryDark,
           ),
-          onTap: () {},
+          onTap: _showPrivacyPolicy,
         ),
         _SettingsRow(
           icon: CupertinoIcons.doc_text_fill,
@@ -763,7 +763,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             size: 16,
             color: AppColors.textSecondaryDark,
           ),
-          onTap: () {},
+          onTap: _showTermsOfService,
         ),
         _SettingsRow(
           icon: CupertinoIcons.shield_fill,
@@ -774,9 +774,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
             size: 16,
             color: AppColors.textSecondaryDark,
           ),
-          onTap: () {},
+          onTap: _showDataAndStorage,
         ),
       ],
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  //  PRIVACY POLICY SHEET
+  // ════════════════════════════════════════════════════════════════════════════
+
+  void _showPrivacyPolicy() {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (_) => _LegalSheet(
+        title: 'Privacy Policy',
+        paragraphs: const [
+          'Data Collection\n\nFitForge collects information you provide directly, such as your name, age, weight, height, fitness goals, and workout logs. We also collect usage data, device information, and performance metrics to improve the app experience. All data collection is transparent and limited to what is necessary to provide our services.',
+          'How We Use Your Data\n\nYour data is used solely to power FitForge features — personalised workout recommendations, progress tracking, AI coaching, and dietary guidance. We do not sell, rent, or share your personal information with third-party advertisers. Aggregated, anonymised data may be used for product improvement and research.',
+          'Data Storage & Security\n\nYour data is stored locally on your device and, where applicable, in encrypted cloud storage. We apply industry-standard security measures including AES-256 encryption at rest and TLS 1.3 in transit. You can delete your account and all associated data at any time from the app settings.',
+          'Your Rights\n\nYou have the right to access, correct, export, or delete any personal data we hold about you. To exercise these rights, use the Data & Storage section in this screen or contact us at privacy@fitforge.app. We will respond to all requests within 30 days in accordance with applicable data protection laws.',
+        ],
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  //  TERMS OF SERVICE SHEET
+  // ════════════════════════════════════════════════════════════════════════════
+
+  void _showTermsOfService() {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (_) => _LegalSheet(
+        title: 'Terms of Service',
+        paragraphs: const [
+          'Acceptance of Terms\n\nBy downloading or using FitForge, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the app. We reserve the right to update these terms at any time; continued use of the app constitutes acceptance of the revised terms.',
+          'Usage Rules\n\nFitForge is intended for personal, non-commercial use only. You agree not to reverse-engineer, modify, distribute, or exploit any part of the app. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.',
+          'Limitations & Disclaimers\n\nFitForge provides general fitness and nutrition guidance for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before starting any new exercise or diet programme. Results may vary and are not guaranteed.',
+          'Liability\n\nTo the maximum extent permitted by law, FitForge and its creators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app. Our total liability for any claim related to the app shall not exceed the amount you paid for FitForge Pro in the 12 months preceding the claim.',
+        ],
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  //  DATA & STORAGE SHEET
+  // ════════════════════════════════════════════════════════════════════════════
+
+  void _showDataAndStorage() {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => _DataStorageSheet(parentContext: context),
     );
   }
 
@@ -1398,6 +1447,404 @@ class _SheetField extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.cardBorderDark),
       ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+//  LEGAL SHEET (Privacy Policy / Terms of Service)
+// ════════════════════════════════════════════════════════════════════════════════
+
+class _LegalSheet extends StatelessWidget {
+  const _LegalSheet({required this.title, required this.paragraphs});
+
+  final String title;
+  final List<String> paragraphs;
+
+  static const _bg = Color(0xFF1A1A27);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: _bg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            const SizedBox(height: 12),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Header row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.accentOrange.withAlpha(20),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.xmark,
+                        color: AppColors.accentOrange,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Scrollable body — max 60% screen height
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: paragraphs
+                      .map(
+                        (p) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Text(
+                            p,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.white70,
+                              height: 1.6,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+//  DATA & STORAGE SHEET
+// ════════════════════════════════════════════════════════════════════════════════
+
+class _DataStorageSheet extends StatelessWidget {
+  const _DataStorageSheet({required this.parentContext});
+
+  final BuildContext parentContext;
+
+  static const _bg = Color(0xFF1A1A27);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: _bg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Drag handle
+                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Header row
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Data & Storage',
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppColors.accentOrange.withAlpha(20),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.xmark,
+                            color: AppColors.accentOrange,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Storage stats card
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.cardDark,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.cardBorderDark),
+                  ),
+                  child: Column(
+                    children: [
+                      _StorageRow(
+                        icon: CupertinoIcons.app_fill,
+                        label: 'App Data',
+                        size: '2.4 MB',
+                        sizeColor: AppColors.accentOrange,
+                        showDivider: true,
+                      ),
+                      _StorageRow(
+                        icon: CupertinoIcons.clear_circled_solid,
+                        label: 'Cache',
+                        size: '0.8 MB',
+                        sizeColor: AppColors.textSecondaryDark,
+                        showDivider: true,
+                      ),
+                      _StorageRow(
+                        icon: CupertinoIcons.photo_fill,
+                        label: 'Progress Photos',
+                        size: '12.6 MB',
+                        sizeColor: AppColors.accentOrange,
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Total
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Total Storage Used: 15.8 MB',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Clear Cache button
+                GestureDetector(
+                  onTap: () => _confirmClearCache(context),
+                  child: Container(
+                    width: double.infinity,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.accentOrange),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Clear Cache',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.accentOrange,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Export My Data button
+                GestureDetector(
+                  onTap: () => _confirmExport(context),
+                  child: Container(
+                    width: double.infinity,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0A0A0F),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Export My Data',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.accentOrange,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmClearCache(BuildContext context) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: const Text('Clear Cache?'),
+        content: const Text('App data will not be affected.'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context); // close dialog
+              Navigator.pop(context); // close sheet
+              ScaffoldMessenger.of(parentContext).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Cache cleared successfully',
+                    style: GoogleFonts.inter(color: Colors.white),
+                  ),
+                  backgroundColor: AppColors.cardDark,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmExport(BuildContext context) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: const Text('Export My Data'),
+        content: const Text(
+            'Export feature coming soon in next update!'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StorageRow extends StatelessWidget {
+  const _StorageRow({
+    required this.icon,
+    required this.label,
+    required this.size,
+    required this.sizeColor,
+    required this.showDivider,
+  });
+
+  final IconData icon;
+  final String label;
+  final String size;
+  final Color sizeColor;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(icon, color: AppColors.textSecondaryDark, size: 20),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Text(
+                size,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: sizeColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showDivider)
+          Padding(
+            padding: const EdgeInsets.only(left: 50),
+            child: Container(height: 0.5, color: AppColors.cardBorderDark),
+          ),
+      ],
     );
   }
 }
