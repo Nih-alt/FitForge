@@ -5,9 +5,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../controllers/workout_controller.dart' show WorkoutController;
+import '../../models/workout_log_model.dart';
 import '../../theme/app_colors.dart';
 import 'workout_summary_screen.dart';
 
@@ -271,7 +274,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               .fadeIn(duration: 600.ms)
               .slideY(begin: 0.15, curve: Curves.easeOut),
           const SizedBox(height: 20),
-          _WorkoutHistoryWidget(onTap: _openWorkoutSummary)
+          _WorkoutHistoryWidget(logs: Get.find<WorkoutController>().workoutLogs, onTap: _openWorkoutSummary)
               .animate(delay: 100.ms)
               .fadeIn(duration: 500.ms)
               .slideY(begin: 0.15, curve: Curves.easeOut),
@@ -318,13 +321,10 @@ class _ProgressScreenState extends State<ProgressScreen>
   // ==========================================================================
 
   // -- Activity calendar cell tap --
-  void _showActivityDetail(int dataIndex, int activityLevel) {
+  void _showActivityDetail(DateTime date, int activityLevel) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    final now = DateTime.now();
-    final daysAgo = 69 - dataIndex; // 70 cells, index 69 = today
-    final date = now.subtract(Duration(days: daysAgo));
+    final workoutCtrl = Get.find<WorkoutController>();
     const dayNames = [
       'Monday', 'Tuesday', 'Wednesday', 'Thursday',
       'Friday', 'Saturday', 'Sunday',
@@ -335,9 +335,20 @@ class _ProgressScreenState extends State<ProgressScreen>
     ];
     final dateStr =
         '${dayNames[date.weekday - 1]}, ${date.day} ${monthNames[date.month - 1]}';
-
-    final workoutNames = ['Upper Body', 'HIIT Cardio', 'Leg Day', 'Full Body'];
-    final rng = math.Random(dataIndex);
+    final dayLogs = workoutCtrl.workoutLogs
+        .where((log) =>
+            log.date.year == date.year &&
+            log.date.month == date.month &&
+            log.date.day == date.day)
+        .toList();
+    final totalDurationMinutes =
+        dayLogs.fold<int>(0, (sum, log) => sum + log.durationSeconds) ~/
+            60;
+    final totalCalories =
+        dayLogs.fold<int>(0, (sum, log) => sum + log.caloriesBurned);
+    final workoutNames = dayLogs.isEmpty
+        ? 'Rest day'
+        : dayLogs.map((log) => log.workoutName).join(', ');
 
     showCupertinoModalPopup(
       context: context,
@@ -405,16 +416,16 @@ class _ProgressScreenState extends State<ProgressScreen>
                 ),
               ] else ...[
                 _sheetStatRow(CupertinoIcons.flame_fill, 'Workout',
-                    workoutNames[rng.nextInt(workoutNames.length)]),
+                    workoutNames),
                 const SizedBox(height: 12),
                 _sheetStatRow(CupertinoIcons.timer, 'Duration',
-                    '${20 + activityLevel * 10} min'),
+                    '$totalDurationMinutes min'),
                 const SizedBox(height: 12),
                 _sheetStatRow(CupertinoIcons.bolt_fill, 'Calories',
-                    '${200 + activityLevel * 120} kcal'),
+                    '$totalCalories kcal'),
                 const SizedBox(height: 12),
-                _sheetStatRow(CupertinoIcons.arrow_right_arrow_left, 'Steps',
-                    '${3000 + activityLevel * 2500}'),
+                _sheetStatRow(
+                    CupertinoIcons.list_bullet, 'Workouts', '${dayLogs.length}'),
               ],
               const SizedBox(height: 8),
             ],
@@ -827,15 +838,30 @@ class _ProgressScreenState extends State<ProgressScreen>
   }
 
   // -- Workout card tap --
-  void _openWorkoutSummary(_WorkoutHistoryData w) {
+  void _openWorkoutSummary(WorkoutLogModel log) {
+    // Format duration
+    final totalSec = log.durationSeconds;
+    final h = totalSec ~/ 3600;
+    final m = (totalSec % 3600) ~/ 60;
+    final durationStr = h > 0 ? '${h}h ${m}m' : '${m}m';
+
+    // Format date as dd MMM yyyy
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    final dateStr =
+        '${log.date.day.toString().padLeft(2, '0')} ${monthNames[log.date.month - 1]} ${log.date.year}';
+
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (_) => WorkoutSummaryScreen(
-          name: w.name,
-          date: w.date,
-          duration: w.duration,
-          calories: w.calories,
-          exerciseCount: w.exercises,
+          name: log.workoutName,
+          date: dateStr,
+          duration: durationStr,
+          calories: '${log.caloriesBurned}',
+          exerciseCount: log.exercisesCompleted,
+          exerciseNames: log.exercises,
         ),
       ),
     );
@@ -1303,16 +1329,6 @@ class _PRHistoryEntry {
   final String value;
 }
 
-class _WorkoutHistoryData {
-  const _WorkoutHistoryData(
-      this.name, this.date, this.duration, this.calories, this.exercises);
-  final String name;
-  final String date;
-  final String duration;
-  final String calories;
-  final int exercises;
-}
-
 // ============================================================================
 //  UPDATE MEASUREMENTS BOTTOM SHEET
 // ============================================================================
@@ -1463,102 +1479,108 @@ class _StreakCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final workoutCtrl = Get.find<WorkoutController>();
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          width: 1.5,
-          color: AppColors.accentOrange.withAlpha(60),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentOrange.withAlpha(30),
-            blurRadius: 40,
-            offset: const Offset(0, 12),
+    return Obx(() {
+      final streak = workoutCtrl.currentStreak.value;
+      final longest = workoutCtrl.calculateLongestStreak();
+
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            width: 1.5,
+            color: AppColors.accentOrange.withAlpha(60),
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.accentOrange.withAlpha(60),
-                                blurRadius: 30,
-                                spreadRadius: 5,
-                              ),
-                            ],
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentOrange.withAlpha(30),
+              blurRadius: 40,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.accentOrange.withAlpha(60),
+                                  blurRadius: 30,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text('\u{1F525}',
-                            style: GoogleFonts.poppins(fontSize: 40)),
-                      ],
-                    ),
-                    const SizedBox(width: 8),
-                    TweenAnimationBuilder<int>(
-                      tween: IntTween(begin: 0, end: 12),
-                      duration: const Duration(milliseconds: 1200),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, value, _) {
-                        return ShaderMask(
-                          shaderCallback: (bounds) =>
-                              AppColors.accentGradient.createShader(bounds),
-                          child: Text('$value',
-                              style: GoogleFonts.poppins(
-                                fontSize: 48,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.white,
-                                height: 1,
-                              )),
-                        );
-                      },
-                    ),
+                          Text('\u{1F525}',
+                              style: GoogleFonts.poppins(fontSize: 40)),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                      TweenAnimationBuilder<int>(
+                        tween: IntTween(begin: 0, end: streak),
+                        duration: const Duration(milliseconds: 1200),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, _) {
+                          return ShaderMask(
+                            shaderCallback: (bounds) =>
+                                AppColors.accentGradient.createShader(bounds),
+                            child: Text('$value',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.white,
+                                  height: 1,
+                                )),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('Day Streak',
+                        style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.onSurface)),
+                    const SizedBox(height: 2),
+                    Text(streak == 0 ? 'Start your streak!' : 'Keep it going!',
+                        style: GoogleFonts.inter(
+                            fontSize: 13, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('Day Streak',
-                      style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: theme.colorScheme.onSurface)),
-                  const SizedBox(height: 2),
-                  Text('Keep it going!',
-                      style: GoogleFonts.inter(
-                          fontSize: 13, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Longest streak: 21 days',
-                style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.accentOrange)),
-          ),
-        ],
-      ),
-    );
+              ],
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Longest streak: $longest days',
+                  style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.accentOrange)),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -1569,48 +1591,66 @@ class _StreakCard extends StatelessWidget {
 class _WeeklySummaryCard extends StatelessWidget {
   const _WeeklySummaryCard();
 
+  String _formatCalories(int cal) {
+    if (cal < 1000) return '$cal';
+    final str = cal.toString();
+    final buf = StringBuffer();
+    for (int i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) buf.write(',');
+      buf.write(str[i]);
+    }
+    return buf.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final workoutCtrl = Get.find<WorkoutController>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('This Week',
-            style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurface)),
-        const SizedBox(height: 14),
-        Row(
-          children: [
-            Expanded(
-                child: _SummaryStatCard(
-                    icon: CupertinoIcons.flame_fill,
-                    iconColor: AppColors.accentOrange,
-                    value: '4',
-                    label: 'completed',
-                    title: 'Workouts')),
-            const SizedBox(width: 10),
-            Expanded(
-                child: _SummaryStatCard(
-                    icon: CupertinoIcons.bolt_fill,
-                    iconColor: AppColors.accentGold,
-                    value: '2,840',
-                    label: 'burned',
-                    title: 'Calories')),
-            const SizedBox(width: 10),
-            Expanded(
-                child: _SummaryStatCard(
-                    icon: CupertinoIcons.timer,
-                    iconColor: AppColors.success,
-                    value: '3.2h',
-                    label: 'total',
-                    title: 'Active Time')),
-          ],
-        ),
-      ],
-    );
+    return Obx(() {
+      final workouts = workoutCtrl.weeklyWorkoutsCompleted.value;
+      final calories = workoutCtrl.totalCaloriesBurned.value;
+      final activeTime = workoutCtrl.totalActiveTime.value;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('This Week',
+              style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface)),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                  child: _SummaryStatCard(
+                      icon: CupertinoIcons.flame_fill,
+                      iconColor: AppColors.accentOrange,
+                      value: '$workouts',
+                      label: 'completed',
+                      title: 'Workouts')),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _SummaryStatCard(
+                      icon: CupertinoIcons.bolt_fill,
+                      iconColor: AppColors.accentGold,
+                      value: _formatCalories(calories),
+                      label: 'burned',
+                      title: 'Calories')),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _SummaryStatCard(
+                      icon: CupertinoIcons.timer,
+                      iconColor: AppColors.success,
+                      value: activeTime,
+                      label: 'total',
+                      title: 'Active Time')),
+            ],
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -1681,37 +1721,23 @@ class _SummaryStatCard extends StatelessWidget {
 class _ActivityCalendar extends StatelessWidget {
   const _ActivityCalendar({required this.onCellTap});
 
-  final void Function(int dataIndex, int level) onCellTap;
+  final void Function(DateTime date, int level) onCellTap;
 
   static const _weeks = 10;
   static const _daysPerWeek = 7;
 
-  static final List<int> _activityData = [
-    0, 1, 2, 3, 1, 0, 0,
-    1, 2, 3, 2, 1, 0, 0,
-    0, 0, 1, 3, 2, 1, 0,
-    2, 3, 3, 2, 1, 0, 0,
-    1, 1, 2, 3, 3, 2, 0,
-    0, 1, 2, 2, 3, 0, 0,
-    1, 2, 3, 3, 2, 1, 0,
-    0, 1, 1, 2, 3, 2, 1,
-    2, 3, 2, 1, 3, 0, 0,
-    1, 2, 3, 0, 0, 0, 0,
-  ];
-
   Color _activityColor(int level, BuildContext context) {
-    final theme = Theme.of(context);
     switch (level) {
       case 0:
-        return theme.cardTheme.color ?? AppColors.cardDark;
+        return const Color(0xFF1A1A27);
       case 1:
-        return AppColors.accentOrange.withAlpha(64);
+        return const Color(0x40FF6B35);
       case 2:
-        return AppColors.accentOrange.withAlpha(128);
+        return const Color(0x80FF6B35);
       case 3:
-        return AppColors.accentOrange;
+        return const Color(0xFFFF6B35);
       default:
-        return theme.cardTheme.color ?? AppColors.cardDark;
+        return const Color(0xFF1A1A27);
     }
   }
 
@@ -1728,11 +1754,13 @@ class _ActivityCalendar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final workoutCtrl = Get.find<WorkoutController>();
 
     final today = DateTime.now();
-    final todayIndex = (_weeks - 1) * _daysPerWeek + (today.weekday - 1);
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final startDate = todayDate.subtract(const Duration(days: 69));
 
-    return Column(
+    return Obx(() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -1776,13 +1804,14 @@ class _ActivityCalendar extends StatelessWidget {
                           children: List.generate(_weeks, (weekIndex) {
                             final dataIndex =
                                 weekIndex * _daysPerWeek + dayIndex;
-                            final isToday = dataIndex == todayIndex;
-                            final level = dataIndex < _activityData.length
-                                ? _activityData[dataIndex]
-                                : 0;
+                            final cellDate = startDate.add(Duration(days: weekIndex * 7 + dayIndex));
+                            final isToday = cellDate.year == todayDate.year &&
+                                cellDate.month == todayDate.month &&
+                                cellDate.day == todayDate.day;
+                            final level = workoutCtrl.activityLevel(cellDate);
 
                             return GestureDetector(
-                              onTap: () => onCellTap(dataIndex, level),
+                                onTap: () => onCellTap(cellDate, level),
                               child: AnimatedContainer(
                                 duration: Duration(
                                     milliseconds: 300 + dataIndex * 15),
@@ -1835,7 +1864,7 @@ class _ActivityCalendar extends StatelessWidget {
           ),
         ),
       ],
-    );
+    ));
   }
 }
 
@@ -2551,133 +2580,190 @@ class _PersonalRecordsWidget extends StatelessWidget {
 // ============================================================================
 
 class _WorkoutHistoryWidget extends StatelessWidget {
-  const _WorkoutHistoryWidget({required this.onTap});
+  const _WorkoutHistoryWidget({required this.logs, required this.onTap});
 
-  final void Function(_WorkoutHistoryData) onTap;
+  final RxList<WorkoutLogModel> logs;
+  final void Function(WorkoutLogModel) onTap;
 
-  static const _history = [
-    _WorkoutHistoryData('Upper Body Blast', 'Today', '35 min', '420 kcal', 6),
-    _WorkoutHistoryData('HIIT Cardio', 'Yesterday', '25 min', '380 kcal', 8),
-    _WorkoutHistoryData('Leg Day', '2 days ago', '45 min', '520 kcal', 7),
-    _WorkoutHistoryData('Core & Abs', '3 days ago', '20 min', '250 kcal', 5),
-    _WorkoutHistoryData('Full Body', '5 days ago', '50 min', '580 kcal', 10),
-  ];
+  String _formatRelativeDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final logDate = DateTime(date.year, date.month, date.day);
+    final diff = today.difference(logDate).inDays;
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Yesterday';
+    return '$diff days ago';
+  }
+
+  String _formatDuration(int totalSeconds) {
+    final h = totalSeconds ~/ 3600;
+    final m = (totalSeconds % 3600) ~/ 60;
+    if (h > 0) return '${h}h ${m}m';
+    return '${m}m';
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Recent Workouts',
-            style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurface)),
-        const SizedBox(height: 14),
-        ...List.generate(_history.length, (i) {
-          final w = _history[i];
-          final isLast = i == _history.length - 1;
+    return Obx(() {
+      if (logs.isEmpty) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Recent Workouts',
+                style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface)),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+              decoration: BoxDecoration(
+                color: theme.cardTheme.color,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+              ),
+              child: Column(
+                children: [
+                  Icon(CupertinoIcons.sportscourt,
+                      size: 48,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                  const SizedBox(height: 12),
+                  Text('No workouts yet',
+                      style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface)),
+                  const SizedBox(height: 4),
+                  Text('No workouts yet. Start your first workout!',
+                      style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                      textAlign: TextAlign.center),
+                ],
+              ),
+            ),
+          ],
+        );
+      }
 
-          return IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 28,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: i == 0
-                              ? AppColors.accentOrange
-                              : AppColors.accentOrange.withAlpha(80),
-                          boxShadow: i == 0
-                              ? [
-                                  BoxShadow(
-                                      color: AppColors.accentOrange
-                                          .withAlpha(60),
-                                      blurRadius: 8)
-                                ]
-                              : null,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Recent Workouts',
+              style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface)),
+          const SizedBox(height: 14),
+          ...List.generate(logs.length, (i) {
+            final log = logs[i];
+            final isLast = i == logs.length - 1;
+            final dateStr = _formatRelativeDate(log.date);
+            final durationStr = _formatDuration(log.durationSeconds);
+            final caloriesStr = '${log.caloriesBurned} kcal';
+
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 28,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: i == 0
+                                ? AppColors.accentOrange
+                                : AppColors.accentOrange.withAlpha(80),
+                            boxShadow: i == 0
+                                ? [
+                                    BoxShadow(
+                                        color: AppColors.accentOrange
+                                            .withAlpha(60),
+                                        blurRadius: 8)
+                                  ]
+                                : null,
+                          ),
                         ),
-                      ),
-                      if (!isLast)
-                        Expanded(
-                          child: Container(
-                              width: 2,
-                              color: AppColors.accentOrange.withAlpha(30)),
-                        ),
-                    ],
+                        if (!isLast)
+                          Expanded(
+                            child: Container(
+                                width: 2,
+                                color: AppColors.accentOrange.withAlpha(30)),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-                    child: GestureDetector(
-                      onTap: () => onTap(w),
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: theme.cardTheme.color,
-                          borderRadius: BorderRadius.circular(16),
-                          border:
-                              Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(w.name,
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: theme.colorScheme.onSurface)),
-                                ),
-                                Text(w.date,
-                                    style: GoogleFonts.inter(
-                                        fontSize: 11,
-                                        color:
-                                            isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                _chip(CupertinoIcons.timer, w.duration, context),
-                                const SizedBox(width: 10),
-                                _chip(
-                                    CupertinoIcons.flame_fill, w.calories, context),
-                                const SizedBox(width: 10),
-                                _chip(CupertinoIcons.list_bullet,
-                                    '${w.exercises} ex', context),
-                              ],
-                            ),
-                          ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+                      child: GestureDetector(
+                        onTap: () => onTap(log),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: theme.cardTheme.color,
+                            borderRadius: BorderRadius.circular(16),
+                            border:
+                                Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(log.workoutName,
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: theme.colorScheme.onSurface)),
+                                  ),
+                                  Text(dateStr,
+                                      style: GoogleFonts.inter(
+                                          fontSize: 11,
+                                          color:
+                                              isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  _chip(CupertinoIcons.timer, durationStr, context),
+                                  const SizedBox(width: 10),
+                                  _chip(
+                                      CupertinoIcons.flame_fill, caloriesStr, context),
+                                  const SizedBox(width: 10),
+                                  _chip(CupertinoIcons.list_bullet,
+                                      '${log.exercisesCompleted} ex', context),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          )
-              .animate(delay: Duration(milliseconds: 100 * i))
-              .fadeIn(duration: 400.ms)
-              .slideX(begin: 0.08, curve: Curves.easeOut);
-        }),
-      ],
-    );
+                ],
+              ),
+            )
+                .animate(delay: Duration(milliseconds: 100 * i))
+                .fadeIn(duration: 400.ms)
+                .slideX(begin: 0.08, curve: Curves.easeOut);
+          }),
+        ],
+      );
+    });
   }
 
   Widget _chip(IconData icon, String text, BuildContext context) {
@@ -3103,3 +3189,4 @@ class _DashedBorderPainter extends CustomPainter {
   bool shouldRepaint(_DashedBorderPainter old) =>
       old.color != color || old.borderRadius != borderRadius;
 }
+

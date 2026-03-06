@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../controllers/user_controller.dart';
+import '../../controllers/workout_controller.dart' show WorkoutController;
+import '../../services/hive_service.dart';
 import '../../theme/app_colors.dart';
 import '../diet/diet_screen.dart';
 import '../profile/profile_screen.dart';
@@ -135,7 +137,7 @@ class _HomeDashboard extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Daily Score Ring
-              const _DailyScoreCard(score: 72, calories: 486, steps: 8249, activeMin: 42)
+              _DailyScoreCard()
                   .animate()
                   .fadeIn(duration: 600.ms)
                   .slideY(begin: 0.15, curve: Curves.easeOut),
@@ -143,7 +145,7 @@ class _HomeDashboard extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Today's Workout
-              const _TodaysWorkoutCard()
+              _TodaysWorkoutCard()
                   .animate(delay: 100.ms)
                   .fadeIn(duration: 500.ms)
                   .slideY(begin: 0.15, curve: Curves.easeOut),
@@ -159,7 +161,7 @@ class _HomeDashboard extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Weekly Progress
-              const _WeeklyProgress()
+              _WeeklyProgress()
                   .animate(delay: 300.ms)
                   .fadeIn(duration: 500.ms)
                   .slideY(begin: 0.15, curve: Curves.easeOut),
@@ -289,111 +291,127 @@ class _AppBarRow extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════════════════
 
 class _DailyScoreCard extends StatelessWidget {
-  const _DailyScoreCard({
-    required this.score,
-    required this.calories,
-    required this.steps,
-    required this.activeMin,
-  });
-
-  final int score;
-  final int calories;
-  final int steps;
-  final int activeMin;
+  _DailyScoreCard();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final workoutCtrl = Get.find<WorkoutController>();
+    final userCtrl = Get.find<UserController>();
+    final hive = Get.find<HiveService>();
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentOrange.withAlpha(15),
-            blurRadius: 40,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // ── Ring ───────────────────────────────────────────────────────
-          SizedBox(
-            width: 180,
-            height: 180,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: score / 100),
-              duration: const Duration(milliseconds: 1400),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return CustomPaint(
-                  painter: _RingPainter(progress: value, isDark: isDark),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          (value * 100).toInt().toString(),
-                          style: GoogleFonts.poppins(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.onSurface,
-                            height: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Daily Score',
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+    return Obx(() {
+      final calories = workoutCtrl.todayCaloriesBurned.value;
+      final activeMin = workoutCtrl.todayActiveMinutes.value;
+      final steps = 0; // placeholder — Phase 3 pedometer
+      final stepsGoal = userCtrl.settings.value.dailyStepsGoal <= 0
+          ? 10000
+          : userCtrl.settings.value.dailyStepsGoal;
+      final waterGoal = userCtrl.settings.value.dailyWaterGoal <= 0
+          ? 8
+          : userCtrl.settings.value.dailyWaterGoal;
+      int waterToday = 0;
+      try {
+        waterToday = hive.getWaterLogByDate(DateTime.now())?.glassesCount ?? 0;
+      } catch (_) {
+        waterToday = 0;
+      }
+      final stepScore = (steps / stepsGoal).clamp(0.0, 1.0) * 40;
+      final workoutScore = workoutCtrl.todaysWorkout.value != null ? 40.0 : 0.0;
+      final waterScore = (waterToday / waterGoal).clamp(0.0, 1.0) * 20;
+      final score =
+          math.min(100, (stepScore + workoutScore + waterScore).round());
+
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentOrange.withAlpha(15),
+              blurRadius: 40,
+              offset: const Offset(0, 12),
             ),
-          ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // ── Ring ───────────────────────────────────────────────────────
+            SizedBox(
+              width: 180,
+              height: 180,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: score / 100),
+                duration: const Duration(milliseconds: 1400),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return CustomPaint(
+                    painter: _RingPainter(progress: value, isDark: isDark),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            (value * 100).toInt().toString(),
+                            style: GoogleFonts.poppins(
+                              fontSize: 48,
+                              fontWeight: FontWeight.w700,
+                              color: theme.colorScheme.onSurface,
+                              height: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Daily Score',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // ── Mini stats row ─────────────────────────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _MiniStat(
-                icon: CupertinoIcons.flame_fill,
-                value: '$calories',
-                label: 'kcal',
-                color: AppColors.accentOrange,
-              ),
-              Container(width: 1, height: 36, color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
-              _MiniStat(
-                icon: CupertinoIcons.arrow_right_arrow_left,
-                value: _formatSteps(steps),
-                label: 'steps',
-                color: AppColors.accentGold,
-              ),
-              Container(width: 1, height: 36, color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
-              _MiniStat(
-                icon: CupertinoIcons.timer,
-                value: '$activeMin',
-                label: 'min',
-                color: AppColors.success,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+            // ── Mini stats row ─────────────────────────────────────────────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _MiniStat(
+                  icon: CupertinoIcons.flame_fill,
+                  value: '$calories',
+                  label: 'kcal',
+                  color: AppColors.accentOrange,
+                ),
+                Container(width: 1, height: 36, color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+                _MiniStat(
+                  icon: CupertinoIcons.arrow_right_arrow_left,
+                  value: _formatSteps(steps),
+                  label: 'steps',
+                  color: AppColors.accentGold,
+                ),
+                Container(width: 1, height: 36, color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+                _MiniStat(
+                  icon: CupertinoIcons.timer,
+                  value: '$activeMin',
+                  label: 'min',
+                  color: AppColors.success,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   String _formatSteps(int steps) {
@@ -502,109 +520,166 @@ class _RingPainter extends CustomPainter {
 // ════════════════════════════════════════════════════════════════════════════
 
 class _TodaysWorkoutCard extends StatelessWidget {
-  const _TodaysWorkoutCard();
+  _TodaysWorkoutCard();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final workoutCtrl = Get.find<WorkoutController>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Today's Workout",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurface,
+    return Obx(() {
+      final todaysWorkout = workoutCtrl.todaysWorkout.value;
+      const nextWorkout = 'Upper Body Blast';
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Today's Workout",
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: theme.cardTheme.color,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
-          ),
-          child: Row(
-            children: [
-              // Left content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Upper Body Blast',
-                      style: GoogleFonts.poppins(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '6 exercises  •  35 min',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Difficulty badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.accentOrange.withAlpha(120),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+            ),
+            child: Row(
+              children: [
+                // Left content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        todaysWorkout != null
+                            ? todaysWorkout.workoutName
+                            : nextWorkout,
+                        style: GoogleFonts.poppins(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
                         ),
-                        color: AppColors.accentOrange.withAlpha(18),
                       ),
-                      child: Text(
-                        'Intermediate',
+                      const SizedBox(height: 4),
+                      Text(
+                        todaysWorkout != null
+                            ? '${todaysWorkout.exercisesCompleted} exercises  •  ${(todaysWorkout.durationSeconds / 60).round()} min'
+                            : 'Next up  •  6 exercises  •  35 min',
                         style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.accentOrange,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      // Difficulty badge or Completed badge
+                      todaysWorkout != null
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppColors.success.withAlpha(120),
+                                ),
+                                color: AppColors.success.withAlpha(18),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.checkmark_alt,
+                                    size: 12,
+                                    color: AppColors.success,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Completed',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.success,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppColors.accentOrange.withAlpha(120),
+                                ),
+                                color: AppColors.accentOrange.withAlpha(18),
+                              ),
+                              child: Text(
+                                'Intermediate',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.accentOrange,
+                                ),
+                              ),
+                            ),
+                    ],
+                  ),
                 ),
-              ),
 
-              // Play button
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  gradient: AppColors.accentGradient,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accentOrange.withAlpha(50),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  CupertinoIcons.play_fill,
-                  color: AppColors.white,
-                  size: 22,
-                ),
-              ),
-            ],
+                // Play button or Completed indicator
+                todaysWorkout != null
+                    ? Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withAlpha(25),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          CupertinoIcons.checkmark_alt,
+                          color: AppColors.success,
+                          size: 24,
+                        ),
+                      )
+                    : Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.accentGradient,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentOrange.withAlpha(50),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.play_fill,
+                          color: AppColors.white,
+                          size: 22,
+                        ),
+                      ),
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
 
@@ -715,50 +790,56 @@ class _QuickStatCard extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════════════════
 
 class _WeeklyProgress extends StatelessWidget {
-  const _WeeklyProgress();
+  _WeeklyProgress();
 
   static const _dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  static const _dayValues = [0.6, 0.85, 0.45, 0.9, 0.7, 0.3, 0.0];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final today = DateTime.now().weekday - 1; // 0 = Monday
+    final workoutCtrl = Get.find<WorkoutController>();
+    final userCtrl = Get.find<UserController>();
+    final hive = Get.find<HiveService>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'This Week',
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurface,
+    return Obx(() {
+      final weeklyMap = workoutCtrl.weeklyActivityMap();
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'This Week',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-          decoration: BoxDecoration(
-            color: theme.cardTheme.color,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(7, (i) {
+                final isToday = i == today;
+                return _DayPill(
+                  label: _dayLabels[i],
+                  fill: weeklyMap[i] ?? 0.0,
+                  isToday: isToday,
+                );
+              }),
+            ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (i) {
-              final isToday = i == today;
-              return _DayPill(
-                label: _dayLabels[i],
-                fill: _dayValues[i],
-                isToday: isToday,
-              );
-            }),
-          ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
 
@@ -881,3 +962,5 @@ class _MotivationalBanner extends StatelessWidget {
     );
   }
 }
+
+

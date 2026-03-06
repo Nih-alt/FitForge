@@ -151,7 +151,7 @@ const List<String> workoutCategories = [
 //  GETX CONTROLLER — Reactive filter state
 // ════════════════════════════════════════════════════════════════════════════
 
-class WorkoutController extends GetxController {
+class _WorkoutBrowseController extends GetxController {
   final selectedCategory = 'All'.obs;
 
   // Advanced filter state (applied via bottom sheet)
@@ -242,7 +242,7 @@ class WorkoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(WorkoutController());
+    final c = Get.put(_WorkoutBrowseController());
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -421,7 +421,7 @@ class WorkoutScreen extends StatelessWidget {
 //  FILTER BOTTOM SHEET — Premium CupertinoModalPopup
 // ════════════════════════════════════════════════════════════════════════════
 
-void _showFilterSheet(BuildContext context, WorkoutController c) {
+void _showFilterSheet(BuildContext context, _WorkoutBrowseController c) {
   showCupertinoModalPopup(
     context: context,
     builder: (_) => _FilterBottomSheet(controller: c),
@@ -430,7 +430,7 @@ void _showFilterSheet(BuildContext context, WorkoutController c) {
 
 class _FilterBottomSheet extends StatefulWidget {
   const _FilterBottomSheet({required this.controller});
-  final WorkoutController controller;
+  final _WorkoutBrowseController controller;
 
   @override
   State<_FilterBottomSheet> createState() => _FilterBottomSheetState();

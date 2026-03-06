@@ -17,6 +17,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
     required this.duration,
     required this.calories,
     required this.exerciseCount,
+    this.exerciseNames = const [],
   });
 
   final String name;
@@ -24,15 +25,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
   final String duration;
   final String calories;
   final int exerciseCount;
-
-  static const _exercises = [
-    _ExerciseDetail('Bench Press', '4 x 10', '60 kg'),
-    _ExerciseDetail('Incline Dumbbell Press', '3 x 12', '22 kg'),
-    _ExerciseDetail('Cable Flyes', '3 x 15', '14 kg'),
-    _ExerciseDetail('Overhead Press', '4 x 8', '40 kg'),
-    _ExerciseDetail('Lateral Raises', '3 x 15', '10 kg'),
-    _ExerciseDetail('Tricep Pushdowns', '3 x 12', '20 kg'),
-  ];
+  final List<String> exerciseNames;
 
   @override
   Widget build(BuildContext context) {
@@ -154,9 +147,11 @@ class WorkoutSummaryScreen extends StatelessWidget {
 
                   // Exercise list
                   ...List.generate(
-                    exerciseCount.clamp(0, _exercises.length),
+                    exerciseNames.isNotEmpty ? exerciseNames.length : exerciseCount,
                     (i) {
-                      final ex = _exercises[i];
+                      final exName = i < exerciseNames.length
+                          ? exerciseNames[i]
+                          : 'Exercise ${i + 1}';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Container(
@@ -188,34 +183,13 @@ class WorkoutSummaryScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 14),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      ex.name,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      ex.sets,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                ex.weight,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.accentOrange,
+                                child: Text(
+                                  exName,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
                               ),
                             ],
@@ -326,9 +300,3 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _ExerciseDetail {
-  const _ExerciseDetail(this.name, this.sets, this.weight);
-  final String name;
-  final String sets;
-  final String weight;
-}

@@ -8,6 +8,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../controllers/workout_controller.dart';
+import '../../models/workout_log_model.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import 'workout_detail_screen.dart';
@@ -291,7 +293,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                   isLast: _ctrl.isLastExercise,
                   onPrevious: _ctrl.goToPrevious,
                   onNext: _ctrl.goToNext,
-                  onFinish: _triggerFinish,
+                  onFinish: () => _triggerFinish(),
                 ),
               ),
             ],
@@ -350,10 +352,26 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     );
   }
 
-  void _triggerFinish() {
+  Future<void> _triggerFinish() async {
     _ctrl.stopTimers();
+    final elapsedSeconds = _ctrl.elapsedSeconds.value;
     final totalTime = _ctrl.formattedTotalTime;
     final totalSets = _ctrl.totalSetsCompleted;
+    final exerciseCount = widget.exercises.length;
+    final caloriesBurned = (elapsedSeconds / 60 * 7).round();
+
+    // Save workout log to Hive
+    final log = WorkoutLogModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      workoutName: widget.workoutName,
+      date: DateTime.now(),
+      durationSeconds: elapsedSeconds,
+      caloriesBurned: caloriesBurned,
+      exercisesCompleted: exerciseCount,
+      exercises: widget.exercises.map((e) => e.name).toList(),
+    );
+    await Get.find<WorkoutController>().saveWorkoutLog(log);
+    if (!mounted) return;
 
     showGeneralDialog(
       context: context,
@@ -366,8 +384,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       ),
       pageBuilder: (ctx, anim1, anim2) => _FinishOverlay(
         totalTime: totalTime,
-        totalExercises: widget.exercises.length,
+        totalExercises: exerciseCount,
         totalSets: totalSets,
+        caloriesBurned: caloriesBurned,
         onDone: () =>
             Navigator.of(ctx).popUntil((route) => route.isFirst),
       ),
@@ -1156,12 +1175,14 @@ class _FinishOverlay extends StatelessWidget {
     required this.totalTime,
     required this.totalExercises,
     required this.totalSets,
+    required this.caloriesBurned,
     required this.onDone,
   });
 
   final String totalTime;
   final int totalExercises;
   final int totalSets;
+  final int caloriesBurned;
   final VoidCallback onDone;
 
   // Fixed particle positions [xFraction, yFraction, size, isGold]
@@ -1284,7 +1305,15 @@ class _FinishOverlay extends StatelessWidget {
                             label: 'Time',
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _StatCard(
+                            icon: CupertinoIcons.flame_fill,
+                            value: '$caloriesBurned',
+                            label: 'kcal',
+                          ),
+                        ),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _StatCard(
                             icon: CupertinoIcons.bolt_fill,
@@ -1292,12 +1321,12 @@ class _FinishOverlay extends StatelessWidget {
                             label: 'Exercises',
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _StatCard(
                             icon: CupertinoIcons.checkmark_seal_fill,
                             value: '$totalSets',
-                            label: 'Sets Done',
+                            label: 'Sets',
                           ),
                         ),
                       ],
@@ -1389,3 +1418,4 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
+

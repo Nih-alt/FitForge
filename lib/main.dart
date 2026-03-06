@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'controllers/theme_controller.dart';
 import 'controllers/user_controller.dart';
+import 'controllers/workout_controller.dart';
 import 'models/app_settings_model.dart';
 import 'models/diet_log_model.dart';
 import 'models/measurement_model.dart';
@@ -96,6 +97,7 @@ Future<void> main() async {
   ]);
 
   Get.put(UserController());
+  Get.put(WorkoutController());
   Get.put(ThemeController(initialThemeMode));
 
   runApp(FitForgeApp(initialThemeMode: initialThemeMode));
@@ -131,3 +133,4 @@ class FitForgeApp extends StatelessWidget {
         ));
   }
 }
+
