@@ -19,10 +19,12 @@ class WorkoutDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final exercises = _exercisesFor(workout.name);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
           // ── Scrollable content ──────────────────────────────────────
@@ -46,7 +48,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.white,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -55,7 +57,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondaryDark,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                             height: 1.6,
                           ),
                         ),
@@ -76,7 +78,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.white,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -130,7 +132,7 @@ class WorkoutDetailScreen extends StatelessWidget {
 
           // ── Bottom button ───────────────────────────────────────────
           Container(
-            color: AppColors.backgroundDark,
+            color: theme.scaffoldBackgroundColor,
             child: SafeArea(
               top: false,
               child: Padding(
@@ -175,14 +177,19 @@ class _TopSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       height: 280,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.cardDark, AppColors.backgroundDark],
+          colors: [
+            theme.cardTheme.color ?? AppColors.cardDark,
+            theme.scaffoldBackgroundColor,
+          ],
         ),
       ),
       child: Stack(
@@ -245,7 +252,7 @@ class _TopSection extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                       height: 1.2,
                     ),
                   )
@@ -297,12 +304,15 @@ class _TagPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -314,7 +324,7 @@ class _TagPill extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: AppColors.white,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ],
@@ -338,12 +348,15 @@ class _ExerciseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Row(
         children: [
@@ -379,7 +392,7 @@ class _ExerciseCard extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -388,7 +401,7 @@ class _ExerciseCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondaryDark,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   ),
                 ),
               ],
@@ -400,15 +413,15 @@ class _ExerciseCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: AppColors.surfaceDark,
-              border: Border.all(color: AppColors.cardBorderDark),
+              color: theme.colorScheme.surface,
+              border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
             ),
             child: Text(
               exercise.muscleGroup,
               style: GoogleFonts.inter(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryDark,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
               ),
             ),
           ),

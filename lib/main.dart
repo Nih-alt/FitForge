@@ -8,7 +8,18 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'controllers/theme_controller.dart';
+import 'controllers/user_controller.dart';
+import 'models/app_settings_model.dart';
+import 'models/diet_log_model.dart';
+import 'models/measurement_model.dart';
+import 'models/personal_record_model.dart';
+import 'models/progress_photo_model.dart';
+import 'models/user_model.dart';
+import 'models/water_log_model.dart';
+import 'models/weight_log_model.dart';
+import 'models/workout_log_model.dart';
 import 'screens/splash/splash_screen.dart';
+import 'services/hive_service.dart';
 import 'theme/app_theme.dart';
 
 // ── Firebase initialization ────────────────────────────────────────────
@@ -28,15 +39,54 @@ Future<void> main() async {
 
   // ── Hive (local storage) ─────────────────────────────────────────────
   await Hive.initFlutter();
+
+  // Register all Hive adapters
+  Hive.registerAdapter(UserModelAdapter());
+  Hive.registerAdapter(WorkoutLogModelAdapter());
+  Hive.registerAdapter(DietLogModelAdapter());
+  Hive.registerAdapter(WaterLogModelAdapter());
+  Hive.registerAdapter(WeightLogModelAdapter());
+  Hive.registerAdapter(MeasurementModelAdapter());
+  Hive.registerAdapter(ProgressPhotoModelAdapter());
+  Hive.registerAdapter(PersonalRecordModelAdapter());
+  Hive.registerAdapter(AppSettingsModelAdapter());
+
+  // Legacy box (used by splash screen for onboarding check)
   await Hive.openBox('user_profile');
 
+  // Open ALL typed boxes directly — ensures they're ready before any read
+  await Hive.openBox<AppSettingsModel>('settings_box');
+  await Hive.openBox<UserModel>('user_box');
+  await Hive.openBox<WorkoutLogModel>('workout_log_box');
+  await Hive.openBox<DietLogModel>('diet_log_box');
+  await Hive.openBox<WaterLogModel>('water_log_box');
+  await Hive.openBox<WeightLogModel>('weight_log_box');
+  await Hive.openBox<MeasurementModel>('measurement_box');
+  await Hive.openBox<ProgressPhotoModel>('progress_photo_box');
+  await Hive.openBox<PersonalRecordModel>('personal_record_box');
+
+  // Read theme SYNCHRONOUSLY from already-opened Hive box
+  final initialThemeMode = ThemeController.readInitialThemeMode();
+  debugPrint('[main] Initial theme mode: $initialThemeMode');
+
+  // Initialize HiveService (boxes already open, just assigns references)
+  final hiveService = HiveService();
+  await hiveService.init();
+  Get.put(hiveService);
+
   // ── System chrome ────────────────────────────────────────────────────
+  final isDark = initialThemeMode == ThemeMode.dark ||
+      (initialThemeMode == ThemeMode.system &&
+          WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+              Brightness.dark);
+
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
+    SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Colors.black,
-      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
     ),
   );
 
@@ -45,37 +95,39 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  Get.put(ThemeController());
+  Get.put(UserController());
+  Get.put(ThemeController(initialThemeMode));
 
-  runApp(const FitForgeApp());
+  runApp(FitForgeApp(initialThemeMode: initialThemeMode));
 }
 
 class FitForgeApp extends StatelessWidget {
-  const FitForgeApp({super.key});
+  const FitForgeApp({super.key, required this.initialThemeMode});
+
+  final ThemeMode initialThemeMode;
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'FitForge',
-      debugShowCheckedModeBanner: false,
+    final themeCtrl = ThemeController.to;
 
-      // ── Theme ──────────────────────────────────────────────────────
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+    return Obx(() => GetMaterialApp(
+          title: 'FitForge',
+          debugShowCheckedModeBanner: false,
 
-      // ── Navigation ─────────────────────────────────────────────────
-      defaultTransition: Transition.cupertino,
-      home: const SplashScreen(),
+          // ── Theme ──────────────────────────────────────────────────────
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: themeCtrl.themeMode,
 
-      // ── Global text decoration reset ───────────────────────────────
-      // Prevents yellow underlines that appear when Text widgets are
-      // rendered inside Cupertino overlays (showCupertinoModalPopup)
-      // which run outside the normal Material widget tree.
-      builder: (context, child) => DefaultTextStyle.merge(
-        style: const TextStyle(decoration: TextDecoration.none),
-        child: child!,
-      ),
-    );
+          // ── Navigation ─────────────────────────────────────────────────
+          defaultTransition: Transition.cupertino,
+          home: const SplashScreen(),
+
+          // ── Global text decoration reset ───────────────────────────────
+          builder: (context, child) => DefaultTextStyle.merge(
+            style: const TextStyle(decoration: TextDecoration.none),
+            child: child!,
+          ),
+        ));
   }
 }

@@ -69,16 +69,19 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
           _buildAppBar(context),
           Container(
-            color: AppColors.backgroundDark,
+            color: theme.scaffoldBackgroundColor,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             child: Material(
-              color: AppColors.surfaceDark,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               child: TabBar(
                 controller: _tabController,
@@ -87,7 +90,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
                 labelColor: AppColors.accentOrange,
-                unselectedLabelColor: const Color(0xFF8888AA),
+                unselectedLabelColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 labelStyle: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -123,6 +126,9 @@ class _ProgressScreenState extends State<ProgressScreen>
   }
 
   Widget _buildAppBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -138,7 +144,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                     style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -147,7 +153,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF8888AA),
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                     ),
                   ),
                 ],
@@ -157,9 +163,9 @@ class _ProgressScreenState extends State<ProgressScreen>
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.cardDark,
+                color: theme.cardTheme.color,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.cardBorderDark),
+                border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
               ),
               child: const Icon(
                 CupertinoIcons.share,
@@ -313,6 +319,9 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // -- Activity calendar cell tap --
   void _showActivityDetail(int dataIndex, int activityLevel) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final now = DateTime.now();
     final daysAgo = 69 - dataIndex; // 70 cells, index 69 = today
     final date = now.subtract(Duration(days: daysAgo));
@@ -334,9 +343,9 @@ class _ProgressScreenState extends State<ProgressScreen>
       context: context,
       builder: (_) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.cardDark,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
           top: false,
@@ -348,7 +357,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondaryDark.withAlpha(60),
+                  color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -362,7 +371,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -383,7 +392,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -391,7 +400,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   'Recovery is part of the journey',
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: AppColors.textSecondaryDark,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   ),
                 ),
               ] else ...[
@@ -416,10 +425,13 @@ class _ProgressScreenState extends State<ProgressScreen>
   }
 
   Widget _sheetStatRow(IconData icon, String label, String value) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.backgroundDark,
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -428,13 +440,13 @@ class _ProgressScreenState extends State<ProgressScreen>
           const SizedBox(width: 12),
           Text(label,
               style: GoogleFonts.inter(
-                  fontSize: 14, color: AppColors.textSecondaryDark)),
+                  fontSize: 14, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
           const Spacer(),
           Text(value,
               style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.white)),
+                  color: theme.colorScheme.onSurface)),
         ],
       ),
     );
@@ -469,6 +481,9 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // -- Measurement row detail --
   void _showMeasurementDetail(String name) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final value = _measurements[name] ?? 0;
     final change = _measurementChanges[name] ?? 0;
     final isUp = change >= 0;
@@ -484,9 +499,9 @@ class _ProgressScreenState extends State<ProgressScreen>
       context: context,
       builder: (_) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.cardDark,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
           top: false,
@@ -497,7 +512,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondaryDark.withAlpha(60),
+                  color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -506,7 +521,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white)),
+                      color: theme.colorScheme.onSurface)),
               const SizedBox(height: 8),
               Text('$value cm',
                   style: GoogleFonts.poppins(
@@ -561,7 +576,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                 child: Text(m[idx],
                                     style: GoogleFonts.inter(
                                         fontSize: 10,
-                                        color: AppColors.textSecondaryDark)),
+                                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                               );
                             }
                             return const SizedBox.shrink();
@@ -632,6 +647,9 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // -- PR detail --
   void _showPRDetail(String exercise) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final currentValue = _prValues[exercise] ?? '';
     final unit = currentValue.contains('kg')
         ? 'kg'
@@ -660,9 +678,9 @@ class _ProgressScreenState extends State<ProgressScreen>
             bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: AppColors.cardDark,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SafeArea(
             top: false,
@@ -674,7 +692,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.textSecondaryDark.withAlpha(60),
+                      color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -683,7 +701,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                       style: GoogleFonts.poppins(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.white)),
+                          color: theme.colorScheme.onSurface)),
                   const SizedBox(height: 8),
                   ShaderMask(
                     shaderCallback: (b) =>
@@ -701,7 +719,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                         style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.white)),
+                            color: theme.colorScheme.onSurface)),
                   ),
                   const SizedBox(height: 10),
                   ...history.map((h) => Padding(
@@ -720,13 +738,13 @@ class _ProgressScreenState extends State<ProgressScreen>
                             Text(h.date,
                                 style: GoogleFonts.inter(
                                     fontSize: 13,
-                                    color: AppColors.textSecondaryDark)),
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                             const Spacer(),
                             Text(h.value,
                                 style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.white)),
+                                    color: theme.colorScheme.onSurface)),
                           ],
                         ),
                       )),
@@ -737,7 +755,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                         style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.white)),
+                            color: theme.colorScheme.onSurface)),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -749,9 +767,9 @@ class _ProgressScreenState extends State<ProgressScreen>
                           style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.white),
+                              color: theme.colorScheme.onSurface),
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundDark,
+                            color: theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                                 color: AppColors.accentOrange, width: 1.5),
@@ -760,7 +778,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                               horizontal: 16, vertical: 12),
                           placeholder: 'Value',
                           placeholderStyle: GoogleFonts.inter(
-                              color: AppColors.textSecondaryDark),
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -768,7 +786,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                           style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondaryDark)),
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -825,6 +843,9 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // -- Add photo --
   void _showAddPhotoSheet() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showCupertinoModalPopup(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -832,7 +853,7 @@ class _ProgressScreenState extends State<ProgressScreen>
             style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppColors.white)),
+                color: theme.colorScheme.onSurface)),
         actions: [
           CupertinoActionSheetAction(
             onPressed: () {
@@ -860,7 +881,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondaryDark)),
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
         ),
       ),
     );
@@ -874,6 +895,9 @@ class _ProgressScreenState extends State<ProgressScreen>
   }
 
   void _showPhotoConfirmation(File imageFile) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final weightController = TextEditingController(text: '76.2');
     final now = DateTime.now();
     final dateStr = '${now.day}/${now.month}/${now.year}';
@@ -888,9 +912,9 @@ class _ProgressScreenState extends State<ProgressScreen>
             maxHeight: MediaQuery.of(ctx).size.height * 0.75,
           ),
           padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: AppColors.cardDark,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SafeArea(
             top: false,
@@ -902,7 +926,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.textSecondaryDark.withAlpha(60),
+                      color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -911,7 +935,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                       style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.white)),
+                          color: theme.colorScheme.onSurface)),
                   const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
@@ -928,19 +952,19 @@ class _ProgressScreenState extends State<ProgressScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 12),
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundDark,
+                            color: theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             children: [
-                              const Icon(CupertinoIcons.calendar,
+                              Icon(CupertinoIcons.calendar,
                                   size: 16,
-                                  color: AppColors.textSecondaryDark),
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                               const SizedBox(width: 8),
                               Text(dateStr,
                                   style: GoogleFonts.inter(
                                       fontSize: 14,
-                                      color: AppColors.white)),
+                                      color: theme.colorScheme.onSurface)),
                             ],
                           ),
                         ),
@@ -951,9 +975,9 @@ class _ProgressScreenState extends State<ProgressScreen>
                           controller: weightController,
                           keyboardType: TextInputType.number,
                           style: GoogleFonts.inter(
-                              fontSize: 14, color: AppColors.white),
+                              fontSize: 14, color: theme.colorScheme.onSurface),
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundDark,
+                            color: theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -962,14 +986,14 @@ class _ProgressScreenState extends State<ProgressScreen>
                             padding: const EdgeInsets.only(left: 14),
                             child: Icon(CupertinoIcons.gauge,
                                 size: 16,
-                                color: AppColors.textSecondaryDark),
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                           ),
                           suffix: Padding(
                             padding: const EdgeInsets.only(right: 14),
                             child: Text('kg',
                                 style: GoogleFonts.inter(
                                     fontSize: 12,
-                                    color: AppColors.textSecondaryDark)),
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                           ),
                         ),
                       ),
@@ -1021,16 +1045,19 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // -- Compare --
   void _showCompare() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     if (_photos.length < 2) {
       showCupertinoDialog(
         context: context,
         builder: (_) => CupertinoAlertDialog(
           title: Text('Not enough photos',
               style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600, color: AppColors.white)),
+                  fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
           content: Text('Add at least 2 photos to compare',
               style:
-                  GoogleFonts.inter(color: AppColors.textSecondaryDark)),
+                  GoogleFonts.inter(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
           actions: [
             CupertinoDialogAction(
               child: Text('OK',
@@ -1047,9 +1074,9 @@ class _ProgressScreenState extends State<ProgressScreen>
       context: context,
       builder: (_) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
-          color: AppColors.backgroundDark,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
           top: false,
@@ -1060,7 +1087,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondaryDark.withAlpha(60),
+                  color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1069,7 +1096,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white)),
+                      color: theme.colorScheme.onSurface)),
               const SizedBox(height: 20),
               Expanded(
                 child: Row(
@@ -1090,12 +1117,12 @@ class _ProgressScreenState extends State<ProgressScreen>
                           Text(_photos.first.date,
                               style: GoogleFonts.inter(
                                   fontSize: 12,
-                                  color: AppColors.textSecondaryDark)),
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                           Text('${_photos.first.weight} kg',
                               style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.white)),
+                                  color: theme.colorScheme.onSurface)),
                         ],
                       ),
                     ),
@@ -1119,12 +1146,12 @@ class _ProgressScreenState extends State<ProgressScreen>
                           Text(_photos.last.date,
                               style: GoogleFonts.inter(
                                   fontSize: 12,
-                                  color: AppColors.textSecondaryDark)),
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                           Text('${_photos.last.weight} kg',
                               style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.white)),
+                                  color: theme.colorScheme.onSurface)),
                         ],
                       ),
                     ),
@@ -1142,10 +1169,13 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // -- Photo full screen --
   void _showPhotoFullScreen(_ProgressPhoto photo) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Scaffold(
-        backgroundColor: AppColors.backgroundDark,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
             children: [
@@ -1156,8 +1186,8 @@ class _ProgressScreenState extends State<ProgressScreen>
                   children: [
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: const Icon(CupertinoIcons.xmark,
-                          color: AppColors.white, size: 22),
+                      child: Icon(CupertinoIcons.xmark,
+                          color: theme.colorScheme.onSurface, size: 22),
                     ),
                     Column(
                       children: [
@@ -1165,11 +1195,11 @@ class _ProgressScreenState extends State<ProgressScreen>
                             style: GoogleFonts.poppins(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.white)),
+                                color: theme.colorScheme.onSurface)),
                         Text('${photo.weight} kg',
                             style: GoogleFonts.inter(
                                 fontSize: 13,
-                                color: AppColors.textSecondaryDark)),
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                       ],
                     ),
                     GestureDetector(
@@ -1194,6 +1224,9 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // -- Delete photo --
   void _showDeletePhotoSheet(_ProgressPhoto photo) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showCupertinoModalPopup(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -1214,13 +1247,16 @@ class _ProgressScreenState extends State<ProgressScreen>
               style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondaryDark)),
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
         ),
       ),
     );
   }
 
   void _confirmDeletePhoto(_ProgressPhoto photo, {bool popAfter = false}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showCupertinoDialog(
       context: context,
       builder: (_) => CupertinoAlertDialog(
@@ -1233,7 +1269,7 @@ class _ProgressScreenState extends State<ProgressScreen>
             onPressed: () => Navigator.pop(context),
             child: Text('Cancel',
                 style: GoogleFonts.inter(
-                    color: AppColors.textSecondaryDark)),
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -1300,14 +1336,17 @@ class _UpdateMeasurementsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.cardDark,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
           top: false,
@@ -1319,7 +1358,7 @@ class _UpdateMeasurementsSheet extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.textSecondaryDark.withAlpha(60),
+                    color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1328,7 +1367,7 @@ class _UpdateMeasurementsSheet extends StatelessWidget {
                     style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.white)),
+                        color: theme.colorScheme.onSurface)),
                 const SizedBox(height: 20),
                 ...controllers.entries.map((entry) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -1342,7 +1381,7 @@ class _UpdateMeasurementsSheet extends StatelessWidget {
                                 style: GoogleFonts.inter(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.white)),
+                                    color: theme.colorScheme.onSurface)),
                           ),
                           SizedBox(
                             width: 80,
@@ -1353,9 +1392,9 @@ class _UpdateMeasurementsSheet extends StatelessWidget {
                               style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.white),
+                                  color: theme.colorScheme.onSurface),
                               decoration: BoxDecoration(
-                                color: AppColors.backgroundDark,
+                                color: theme.scaffoldBackgroundColor,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                     color: AppColors.accentOrange, width: 1.5),
@@ -1368,7 +1407,7 @@ class _UpdateMeasurementsSheet extends StatelessWidget {
                           Text('cm',
                               style: GoogleFonts.inter(
                                   fontSize: 13,
-                                  color: AppColors.textSecondaryDark)),
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                         ],
                       ),
                     )),
@@ -1422,10 +1461,13 @@ class _StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           width: 1.5,
@@ -1496,11 +1538,11 @@ class _StreakCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.white)),
+                          color: theme.colorScheme.onSurface)),
                   const SizedBox(height: 2),
                   Text('Keep it going!',
                       style: GoogleFonts.inter(
-                          fontSize: 13, color: AppColors.textSecondaryDark)),
+                          fontSize: 13, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                 ],
               ),
             ],
@@ -1529,6 +1571,8 @@ class _WeeklySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1536,7 +1580,7 @@ class _WeeklySummaryCard extends StatelessWidget {
             style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white)),
+                color: theme.colorScheme.onSurface)),
         const SizedBox(height: 14),
         Row(
           children: [
@@ -1587,12 +1631,15 @@ class _SummaryStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Column(
         children: [
@@ -1610,11 +1657,11 @@ class _SummaryStatCard extends StatelessWidget {
               style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.white)),
+                  color: theme.colorScheme.onSurface)),
           const SizedBox(height: 2),
           Text(label,
               style: GoogleFonts.inter(
-                  fontSize: 11, color: AppColors.textSecondaryDark)),
+                  fontSize: 11, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
           const SizedBox(height: 4),
           Text(title,
               style: GoogleFonts.inter(
@@ -1652,10 +1699,11 @@ class _ActivityCalendar extends StatelessWidget {
     1, 2, 3, 0, 0, 0, 0,
   ];
 
-  Color _activityColor(int level) {
+  Color _activityColor(int level, BuildContext context) {
+    final theme = Theme.of(context);
     switch (level) {
       case 0:
-        return AppColors.cardDark;
+        return theme.cardTheme.color ?? AppColors.cardDark;
       case 1:
         return AppColors.accentOrange.withAlpha(64);
       case 2:
@@ -1663,7 +1711,7 @@ class _ActivityCalendar extends StatelessWidget {
       case 3:
         return AppColors.accentOrange;
       default:
-        return AppColors.cardDark;
+        return theme.cardTheme.color ?? AppColors.cardDark;
     }
   }
 
@@ -1678,6 +1726,9 @@ class _ActivityCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final today = DateTime.now();
     final todayIndex = (_weeks - 1) * _daysPerWeek + (today.weekday - 1);
 
@@ -1691,21 +1742,21 @@ class _ActivityCalendar extends StatelessWidget {
                 style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white)),
+                    color: theme.colorScheme.onSurface)),
             Text(_monthYear,
                 style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondaryDark)),
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
           ],
         ),
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: Column(
             children: [
@@ -1738,7 +1789,7 @@ class _ActivityCalendar extends StatelessWidget {
                                 width: clampedSize,
                                 height: clampedSize,
                                 decoration: BoxDecoration(
-                                  color: _activityColor(level),
+                                  color: _activityColor(level, context),
                                   borderRadius: BorderRadius.circular(3),
                                   border: isToday
                                       ? Border.all(
@@ -1761,7 +1812,7 @@ class _ActivityCalendar extends StatelessWidget {
                 children: [
                   Text('Less',
                       style: GoogleFonts.inter(
-                          fontSize: 10, color: AppColors.textSecondaryDark)),
+                          fontSize: 10, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                   const SizedBox(width: 6),
                   ...[0, 1, 2, 3].map((level) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -1769,7 +1820,7 @@ class _ActivityCalendar extends StatelessWidget {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: _activityColor(level),
+                            color: _activityColor(level, context),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -1777,7 +1828,7 @@ class _ActivityCalendar extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text('More',
                       style: GoogleFonts.inter(
-                          fontSize: 10, color: AppColors.textSecondaryDark)),
+                          fontSize: 10, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                 ],
               ),
             ],
@@ -1804,6 +1855,9 @@ class _WeightProgressGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1814,19 +1868,19 @@ class _WeightProgressGraph extends StatelessWidget {
                 style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white)),
+                    color: theme.colorScheme.onSurface)),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.cardDark,
+                color: theme.cardTheme.color,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.cardBorderDark),
+                border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
               ),
               child: Text('Last 30 days',
                   style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondaryDark)),
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
             ),
           ],
         ),
@@ -1835,9 +1889,9 @@ class _WeightProgressGraph extends StatelessWidget {
           height: 220,
           padding: const EdgeInsets.fromLTRB(8, 20, 16, 8),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: LineChart(
             LineChartData(
@@ -1846,7 +1900,7 @@ class _WeightProgressGraph extends StatelessWidget {
                 drawVerticalLine: false,
                 horizontalInterval: 1,
                 getDrawingHorizontalLine: (_) => FlLine(
-                  color: const Color(0x08FFFFFF),
+                  color: isDark ? const Color(0x08FFFFFF) : const Color(0x0A000000),
                   strokeWidth: 1,
                 ),
               ),
@@ -1868,7 +1922,7 @@ class _WeightProgressGraph extends StatelessWidget {
                           child: Text('D${day + 1}',
                               style: GoogleFonts.inter(
                                   fontSize: 10,
-                                  color: AppColors.textSecondaryDark)),
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                         );
                       }
                       return const SizedBox.shrink();
@@ -1887,7 +1941,7 @@ class _WeightProgressGraph extends StatelessWidget {
                         return Text('${value.toInt()}',
                             style: GoogleFonts.inter(
                                 fontSize: 10,
-                                color: AppColors.textSecondaryDark));
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight));
                       }
                       return const SizedBox.shrink();
                     },
@@ -1929,7 +1983,7 @@ class _WeightProgressGraph extends StatelessWidget {
               ],
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (_) => AppColors.surfaceDark,
+                  getTooltipColor: (_) => theme.colorScheme.surface,
                   tooltipRoundedRadius: 8,
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
@@ -1937,7 +1991,7 @@ class _WeightProgressGraph extends StatelessWidget {
                         'Day ${spot.x.toInt() + 1}\n',
                         GoogleFonts.inter(
                             fontSize: 11,
-                            color: AppColors.textSecondaryDark),
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                         children: [
                           TextSpan(
                             text: '${spot.y.toStringAsFixed(1)} kg',
@@ -1970,12 +2024,15 @@ class _BmiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Column(
         children: [
@@ -1983,7 +2040,7 @@ class _BmiCard extends StatelessWidget {
               style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.white)),
+                  color: theme.colorScheme.onSurface)),
           const SizedBox(height: 20),
           SizedBox(
             width: 220,
@@ -1994,7 +2051,7 @@ class _BmiCard extends StatelessWidget {
               curve: Curves.easeOutCubic,
               builder: (context, value, _) {
                 return CustomPaint(
-                  painter: _BmiGaugePainter(bmi: value),
+                  painter: _BmiGaugePainter(bmi: value, needleColor: theme.colorScheme.onSurface),
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
@@ -2006,7 +2063,7 @@ class _BmiCard extends StatelessWidget {
                               style: GoogleFonts.poppins(
                                   fontSize: 36,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.white,
+                                  color: theme.colorScheme.onSurface,
                                   height: 1)),
                           const SizedBox(height: 2),
                           Text('Normal',
@@ -2026,10 +2083,10 @@ class _BmiCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _bmiLabel('Under', const Color(0xFFFF4D6A)),
-              _bmiLabel('Normal', AppColors.success),
-              _bmiLabel('Over', const Color(0xFFFFB800)),
-              _bmiLabel('Obese', const Color(0xFFFF4D6A)),
+              _bmiLabel('Under', const Color(0xFFFF4D6A), context),
+              _bmiLabel('Normal', AppColors.success, context),
+              _bmiLabel('Over', const Color(0xFFFFB800), context),
+              _bmiLabel('Obese', const Color(0xFFFF4D6A), context),
             ],
           ),
         ],
@@ -2037,7 +2094,10 @@ class _BmiCard extends StatelessWidget {
     );
   }
 
-  Widget _bmiLabel(String text, Color color) {
+  Widget _bmiLabel(String text, Color color, BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -2050,15 +2110,16 @@ class _BmiCard extends StatelessWidget {
             style: GoogleFonts.inter(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryDark)),
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
       ],
     );
   }
 }
 
 class _BmiGaugePainter extends CustomPainter {
-  _BmiGaugePainter({required this.bmi});
+  _BmiGaugePainter({required this.bmi, required this.needleColor});
   final double bmi;
+  final Color needleColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2102,21 +2163,21 @@ class _BmiGaugePainter extends CustomPainter {
         center,
         needleEnd,
         Paint()
-          ..color = AppColors.white.withAlpha(10)
+          ..color = needleColor.withAlpha(10)
           ..strokeWidth = 4
           ..strokeCap = StrokeCap.round);
     canvas.drawLine(
         center,
         needleEnd,
         Paint()
-          ..color = AppColors.white
+          ..color = needleColor
           ..strokeWidth = 2.5
           ..strokeCap = StrokeCap.round);
-    canvas.drawCircle(center, 5, Paint()..color = AppColors.white);
+    canvas.drawCircle(center, 5, Paint()..color = needleColor);
   }
 
   @override
-  bool shouldRepaint(_BmiGaugePainter old) => old.bmi != bmi;
+  bool shouldRepaint(_BmiGaugePainter old) => old.bmi != bmi || old.needleColor != needleColor;
 }
 
 class _ArcSegment {
@@ -2152,6 +2213,9 @@ class _BodyMeasurementsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final entries = measurements.entries.toList();
 
     return Column(
@@ -2164,7 +2228,7 @@ class _BodyMeasurementsWidget extends StatelessWidget {
                 style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white)),
+                    color: theme.colorScheme.onSurface)),
             GestureDetector(
               onTap: onUpdate,
               child: Container(
@@ -2186,9 +2250,9 @@ class _BodyMeasurementsWidget extends StatelessWidget {
         const SizedBox(height: 14),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: Column(
             children: entries.asMap().entries.map((e) {
@@ -2224,7 +2288,7 @@ class _BodyMeasurementsWidget extends StatelessWidget {
                                 style: GoogleFonts.inter(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.white)),
+                                    color: theme.colorScheme.onSurface)),
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.min,
@@ -2261,7 +2325,7 @@ class _BodyMeasurementsWidget extends StatelessWidget {
                   if (i < entries.length - 1)
                     Divider(
                         height: 1,
-                        color: AppColors.cardBorderDark,
+                        color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
                         indent: 66),
                 ],
               );
@@ -2285,6 +2349,9 @@ class _CaloriesBurnedGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2292,15 +2359,15 @@ class _CaloriesBurnedGraph extends StatelessWidget {
             style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white)),
+                color: theme.colorScheme.onSurface)),
         const SizedBox(height: 14),
         Container(
           height: 200,
           padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: BarChart(
             BarChartData(
@@ -2308,7 +2375,7 @@ class _CaloriesBurnedGraph extends StatelessWidget {
               maxY: 700,
               barTouchData: BarTouchData(
                 touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (_) => AppColors.surfaceDark,
+                  getTooltipColor: (_) => theme.colorScheme.surface,
                   tooltipRoundedRadius: 8,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
@@ -2337,7 +2404,7 @@ class _CaloriesBurnedGraph extends StatelessWidget {
                         child: Text(_days[value.toInt()],
                             style: GoogleFonts.inter(
                                 fontSize: 10,
-                                color: AppColors.textSecondaryDark)),
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                       );
                     },
                   ),
@@ -2388,6 +2455,9 @@ class _PersonalRecordsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final entries = prValues.entries.toList();
 
     return Column(
@@ -2397,7 +2467,7 @@ class _PersonalRecordsWidget extends StatelessWidget {
             style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white)),
+                color: theme.colorScheme.onSurface)),
         const SizedBox(height: 14),
         ...List.generate(entries.length, (i) {
           final exercise = entries[i].key;
@@ -2412,9 +2482,9 @@ class _PersonalRecordsWidget extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.cardDark,
+                  color: theme.cardTheme.color,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.cardBorderDark),
+                  border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
                 ),
                 child: Row(
                   children: [
@@ -2434,7 +2504,7 @@ class _PersonalRecordsWidget extends StatelessWidget {
                           style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.white)),
+                              color: theme.colorScheme.onSurface)),
                     ),
                     if (isNew)
                       Container(
@@ -2495,6 +2565,9 @@ class _WorkoutHistoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2502,7 +2575,7 @@ class _WorkoutHistoryWidget extends StatelessWidget {
             style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white)),
+                color: theme.colorScheme.onSurface)),
         const SizedBox(height: 14),
         ...List.generate(_history.length, (i) {
           final w = _history[i];
@@ -2552,10 +2625,10 @@ class _WorkoutHistoryWidget extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: AppColors.cardDark,
+                          color: theme.cardTheme.color,
                           borderRadius: BorderRadius.circular(16),
                           border:
-                              Border.all(color: AppColors.cardBorderDark),
+                              Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2569,25 +2642,25 @@ class _WorkoutHistoryWidget extends StatelessWidget {
                                       style: GoogleFonts.poppins(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w600,
-                                          color: AppColors.white)),
+                                          color: theme.colorScheme.onSurface)),
                                 ),
                                 Text(w.date,
                                     style: GoogleFonts.inter(
                                         fontSize: 11,
                                         color:
-                                            AppColors.textSecondaryDark)),
+                                            isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                               ],
                             ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                _chip(CupertinoIcons.timer, w.duration),
+                                _chip(CupertinoIcons.timer, w.duration, context),
                                 const SizedBox(width: 10),
                                 _chip(
-                                    CupertinoIcons.flame_fill, w.calories),
+                                    CupertinoIcons.flame_fill, w.calories, context),
                                 const SizedBox(width: 10),
                                 _chip(CupertinoIcons.list_bullet,
-                                    '${w.exercises} ex'),
+                                    '${w.exercises} ex', context),
                               ],
                             ),
                           ],
@@ -2607,15 +2680,18 @@ class _WorkoutHistoryWidget extends StatelessWidget {
     );
   }
 
-  Widget _chip(IconData icon, String text) {
+  Widget _chip(IconData icon, String text, BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: AppColors.textSecondaryDark),
+        Icon(icon, size: 12, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
         const SizedBox(width: 4),
         Text(text,
             style: GoogleFonts.inter(
-                fontSize: 11, color: AppColors.textSecondaryDark)),
+                fontSize: 11, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
       ],
     );
   }
@@ -2639,6 +2715,9 @@ class _MostTrainedMuscles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2646,14 +2725,14 @@ class _MostTrainedMuscles extends StatelessWidget {
             style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white)),
+                color: theme.colorScheme.onSurface)),
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: Column(
             children: _muscles.asMap().entries.map((entry) {
@@ -2670,7 +2749,7 @@ class _MostTrainedMuscles extends StatelessWidget {
                           style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.white)),
+                              color: theme.colorScheme.onSurface)),
                     ),
                     Expanded(
                       child: TweenAnimationBuilder<double>(
@@ -2681,7 +2760,7 @@ class _MostTrainedMuscles extends StatelessWidget {
                           return Container(
                             height: 10,
                             decoration: BoxDecoration(
-                              color: const Color(0x10FFFFFF),
+                              color: isDark ? const Color(0x10FFFFFF) : const Color(0x15000000),
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: FractionallySizedBox(
@@ -2747,6 +2826,9 @@ class _ProgressPhotosWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2757,7 +2839,7 @@ class _ProgressPhotosWidget extends StatelessWidget {
                 style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white)),
+                    color: theme.colorScheme.onSurface)),
             GestureDetector(
               onTap: onAddPhoto,
               child: Container(
@@ -2793,47 +2875,50 @@ class _ProgressPhotosWidget extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.cardDark,
+              color: theme.cardTheme.color,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.cardBorderDark),
+              border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.arrow_right_arrow_left,
-                    size: 14, color: AppColors.textSecondaryDark),
+                Icon(CupertinoIcons.arrow_right_arrow_left,
+                    size: 14, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                 const SizedBox(width: 8),
                 Text('Compare',
                     style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondaryDark)),
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
               ],
             ),
           ),
         ),
         const SizedBox(height: 16),
 
-        if (photos.isEmpty) _buildEmptyState() else ...[
-          _buildPhotoGrid(),
+        if (photos.isEmpty) _buildEmptyState(context) else ...[
+          _buildPhotoGrid(context),
           const SizedBox(height: 12),
           Center(
             child: Text('Long press a photo to delete',
                 style: GoogleFonts.inter(
-                    fontSize: 12, color: AppColors.textSecondaryDark)),
+                    fontSize: 12, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
           ),
         ],
       ],
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       height: 280,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
       ),
       child: CustomPaint(
         painter: _DashedBorderPainter(
@@ -2858,11 +2943,11 @@ class _ProgressPhotosWidget extends StatelessWidget {
                 style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.white)),
+                    color: theme.colorScheme.onSurface)),
             const SizedBox(height: 6),
             Text('Track your transformation visually',
                 style: GoogleFonts.inter(
-                    fontSize: 13, color: AppColors.textSecondaryDark)),
+                    fontSize: 13, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: onAddPhoto,
@@ -2901,7 +2986,10 @@ class _ProgressPhotosWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPhotoGrid() {
+  Widget _buildPhotoGrid(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -2920,7 +3008,7 @@ class _ProgressPhotosWidget extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.cardBorderDark),
+              border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),

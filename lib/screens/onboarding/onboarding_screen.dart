@@ -18,7 +18,7 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Column(
@@ -66,7 +66,7 @@ class _TopBar extends StatelessWidget {
             count: OnboardingController.totalPages,
             effect: ExpandingDotsEffect(
               activeDotColor: AppColors.accentOrange,
-              dotColor: AppColors.cardDark,
+              dotColor: Theme.of(context).cardTheme.color ?? AppColors.cardDark,
               dotHeight: 8,
               dotWidth: 8,
               expansionFactor: 3,
@@ -75,6 +75,7 @@ class _TopBar extends StatelessWidget {
           ),
           Obx(() {
             if (controller.currentPage.value == 0) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
               return GestureDetector(
                 onTap: controller.skipToLast,
                 child: Text(
@@ -82,7 +83,7 @@ class _TopBar extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondaryDark,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   ),
                 ),
               );
@@ -203,7 +204,7 @@ class _WelcomePage extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 36,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               height: 1.2,
               letterSpacing: -0.5,
             ),
@@ -220,7 +221,9 @@ class _WelcomePage extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w400,
-              color: AppColors.textSecondaryDark,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
               height: 1.6,
             ),
           )
@@ -256,7 +259,7 @@ class _PersonalInfoPage extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               height: 1.2,
             ),
           )
@@ -269,7 +272,9 @@ class _PersonalInfoPage extends StatelessWidget {
             "Let's personalize your experience",
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: AppColors.textSecondaryDark,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
             ),
           ).animate(delay: 200.ms).fadeIn(duration: 400.ms),
 
@@ -320,7 +325,7 @@ class _BodyStatsPage extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               height: 1.2,
             ),
           )
@@ -333,7 +338,9 @@ class _BodyStatsPage extends StatelessWidget {
             "We'll use this to tailor your plan",
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: AppColors.textSecondaryDark,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
             ),
           ).animate(delay: 200.ms).fadeIn(duration: 400.ms),
 
@@ -406,7 +413,7 @@ class _GoalPage extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               height: 1.2,
             ),
           )
@@ -419,7 +426,9 @@ class _GoalPage extends StatelessWidget {
             "Choose what drives you",
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: AppColors.textSecondaryDark,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
             ),
           ).animate(delay: 200.ms).fadeIn(duration: 400.ms),
 
@@ -475,33 +484,38 @@ class _OnboardingTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
+
     return TextField(
       controller: controller,
       textCapitalization: textCapitalization,
       style: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: AppColors.white,
+        color: theme.colorScheme.onSurface,
       ),
       cursorColor: AppColors.accentOrange,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.inter(
           fontSize: 16,
-          color: AppColors.textSecondaryDark,
+          color: textSecondary,
         ),
-        prefixIcon: Icon(icon, color: AppColors.textSecondaryDark, size: 22),
+        prefixIcon: Icon(icon, color: textSecondary, size: 22),
         filled: true,
-        fillColor: AppColors.cardDark,
+        fillColor: theme.cardTheme.color,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.cardBorderDark),
+          borderSide: BorderSide(color: borderColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.cardBorderDark),
+          borderSide: BorderSide(color: borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -531,30 +545,30 @@ class _DobPickerField extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final isDark = theme.brightness == Brightness.dark;
         return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.cardDark,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SafeArea(
             top: false,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ── Drag handle ────────────────────────────────────────
                 Center(
                   child: Container(
                     margin: const EdgeInsets.only(top: 12),
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0x26FFFFFF),
+                      color: (isDark ? Colors.white : Colors.black).withAlpha(38),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
 
-                // ── Header ─────────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
                   child: Row(
@@ -565,7 +579,7 @@ class _DobPickerField extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.white,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                       GestureDetector(
@@ -586,18 +600,16 @@ class _DobPickerField extends StatelessWidget {
                   ),
                 ),
 
-                // ── Divider ────────────────────────────────────────────
-                const Divider(color: Color(0x15FFFFFF), height: 1),
+                Divider(color: (isDark ? Colors.white : Colors.black).withAlpha(21), height: 1),
 
-                // ── Cupertino Date Picker ──────────────────────────────
                 SizedBox(
                   height: 250,
                   child: CupertinoTheme(
-                    data: const CupertinoThemeData(
-                      brightness: Brightness.dark,
+                    data: CupertinoThemeData(
+                      brightness: isDark ? Brightness.dark : Brightness.light,
                       textTheme: CupertinoTextThemeData(
                         dateTimePickerTextStyle: TextStyle(
-                          color: AppColors.white,
+                          color: theme.colorScheme.onSurface,
                           fontSize: 21,
                         ),
                       ),
@@ -608,7 +620,7 @@ class _DobPickerField extends StatelessWidget {
                       initialDateTime: tempDate,
                       maximumDate: now,
                       minimumDate: DateTime(now.year - 100),
-                      backgroundColor: AppColors.cardDark,
+                      backgroundColor: theme.cardTheme.color ?? (isDark ? AppColors.cardDark : AppColors.cardLight),
                       onDateTimeChanged: (date) {
                         tempDate = date;
                       },
@@ -625,6 +637,9 @@ class _DobPickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Obx(() {
       final dob = controller.selectedDob.value;
       final age = controller.calculatedAge;
@@ -642,12 +657,12 @@ class _DobPickerField extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
               decoration: BoxDecoration(
-                color: AppColors.cardDark,
+                color: theme.cardTheme.color,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: hasValue
                       ? AppColors.accentOrange
-                      : AppColors.cardBorderDark,
+                      : (isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
                   width: hasValue ? 1.5 : 1,
                 ),
               ),
@@ -662,8 +677,8 @@ class _DobPickerField extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         color: hasValue
-                            ? AppColors.white
-                            : AppColors.textSecondaryDark,
+                            ? theme.colorScheme.onSurface
+                            : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                       ),
                     ),
                   ),
@@ -809,14 +824,17 @@ class _StatStepperState extends State<_StatStepper> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: Column(
             children: [
@@ -825,7 +843,7 @@ class _StatStepperState extends State<_StatStepper> {
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondaryDark,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -898,7 +916,7 @@ class _StatStepperState extends State<_StatStepper> {
           style: GoogleFonts.poppins(
             fontSize: 40,
             fontWeight: FontWeight.w700,
-            color: AppColors.white,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(width: 4),
@@ -938,7 +956,7 @@ class _StatStepperState extends State<_StatStepper> {
             style: GoogleFonts.poppins(
               fontSize: 40,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             cursorColor: AppColors.accentOrange,
             decoration: const InputDecoration(
@@ -982,6 +1000,8 @@ class _StepperButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -989,8 +1009,8 @@ class _StepperButton extends StatelessWidget {
         height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surfaceDark,
-          border: Border.all(color: AppColors.cardBorderDark),
+          color: theme.cardTheme.color,
+          border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
         ),
         child: Icon(icon, color: AppColors.accentOrange, size: 24),
       ),
@@ -1014,18 +1034,23 @@ class _GoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: theme.cardTheme.color,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AppColors.accentOrange
-                : const Color(0x14FFFFFF),
+                : borderColor,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
@@ -1049,14 +1074,14 @@ class _GoalCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: isSelected
                     ? AppColors.accentOrange.withAlpha(25)
-                    : AppColors.surfaceDark,
+                    : theme.cardTheme.color,
               ),
               child: Icon(
                 icon,
                 size: 26,
                 color: isSelected
                     ? AppColors.accentOrange
-                    : AppColors.textSecondaryDark,
+                    : textSecondary,
               ),
             ),
             const SizedBox(height: 14),
@@ -1067,7 +1092,7 @@ class _GoalCard extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color:
-                    isSelected ? AppColors.white : AppColors.textSecondaryDark,
+                    isSelected ? theme.colorScheme.onSurface : textSecondary,
               ),
             ),
           ],

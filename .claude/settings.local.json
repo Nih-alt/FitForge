@@ -8,7 +8,8 @@
       "Bash(npm update:*)",
       "Bash(xargs grep:*)",
       "Bash(./gradlew assembleDebug:*)",
-      "Bash(flutter pub:*)"
+      "Bash(flutter pub:*)",
+      "Bash(flutter packages:*)"
     ]
   }
 }

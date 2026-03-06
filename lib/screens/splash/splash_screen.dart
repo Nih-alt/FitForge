@@ -38,8 +38,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -66,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: GoogleFonts.poppins(
                 fontSize: 36,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white,
+                color: theme.colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             )
@@ -79,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryDark,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 letterSpacing: 3,
               ),
             )

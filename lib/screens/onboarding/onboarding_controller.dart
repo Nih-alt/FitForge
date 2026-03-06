@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../../controllers/user_controller.dart';
+import '../../models/app_settings_model.dart';
+import '../../models/user_model.dart';
+import '../../models/weight_log_model.dart';
 import '../../screens/home/home_screen.dart';
+import '../../services/hive_service.dart';
 
 class OnboardingController extends GetxController {
   final pageController = PageController();
@@ -145,19 +150,59 @@ class OnboardingController extends GetxController {
   // ── Persistence ──────────────────────────────────────────────────────
 
   Future<void> _saveAndFinish() async {
-    final box = Hive.box('user_profile');
-    await box.putAll({
-      'name': nameController.text.trim().isEmpty
-          ? 'Athlete'
-          : nameController.text.trim(),
-      'age': calculatedAge ?? 0,
-      'weight': weight.value,
-      'height': height.value,
-      'goal': selectedGoal.value,
-      'onboarding_complete': true,
-    });
+    try {
+      final hive = Get.find<HiveService>();
+      final userCtrl = Get.find<UserController>();
 
-    Get.offAll(() => const HomeScreen());
+      final name = nameController.text.trim().isEmpty
+          ? 'Athlete'
+          : nameController.text.trim();
+      final dob = selectedDob.value ?? DateTime(2000, 1, 1);
+      final age = calculatedAge ?? 25;
+
+      // Save user model
+      final userModel = UserModel(
+        name: name,
+        dateOfBirth: dob,
+        age: age,
+        weight: weight.value,
+        height: height.value,
+        goal: selectedGoal.value,
+        createdAt: DateTime.now(),
+      );
+      await userCtrl.saveNewUser(userModel);
+
+      // Save default app settings
+      final defaultSettings = AppSettingsModel(
+        themeMode: 'system',
+        weightUnit: 'kg',
+        heightUnit: 'cm',
+        workoutReminderOn: true,
+        mealReminderOn: true,
+        waterReminderOn: true,
+        progressUpdateOn: true,
+        achievementOn: true,
+        weeklyWorkoutGoal: 4,
+        dailyCalorieGoal: 2200,
+        dailyWaterGoal: 8,
+        dailyStepsGoal: 10000,
+      );
+      await userCtrl.saveSettings(defaultSettings);
+
+      // Save initial weight log
+      await hive.saveWeightLog(WeightLogModel(
+        date: DateTime.now(),
+        weight: weight.value,
+      ));
+
+      // Mark onboarding complete in legacy box
+      final box = Hive.box('user_profile');
+      await box.put('onboarding_complete', true);
+
+      Get.offAll(() => const HomeScreen());
+    } catch (e) {
+      _showError('Failed to save data. Please try again.');
+    }
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────

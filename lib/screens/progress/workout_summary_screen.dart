@@ -36,8 +36,11 @@ class WorkoutSummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
           // App bar
@@ -53,9 +56,9 @@ class WorkoutSummaryScreen extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.cardDark,
+                        color: theme.cardTheme.color,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.cardBorderDark),
+                        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
                       ),
                       child: const Icon(
                         CupertinoIcons.back,
@@ -74,14 +77,14 @@ class WorkoutSummaryScreen extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.white,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         Text(
                           date,
                           style: GoogleFonts.inter(
                             fontSize: 12,
-                            color: AppColors.textSecondaryDark,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                           ),
                         ),
                       ],
@@ -144,7 +147,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -159,10 +162,9 @@ class WorkoutSummaryScreen extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppColors.cardDark,
+                            color: theme.cardTheme.color,
                             borderRadius: BorderRadius.circular(16),
-                            border:
-                                Border.all(color: AppColors.cardBorderDark),
+                            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
                           ),
                           child: Row(
                             children: [
@@ -187,15 +189,14 @@ class WorkoutSummaryScreen extends StatelessWidget {
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       ex.name,
                                       style: GoogleFonts.inter(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w500,
-                                        color: AppColors.white,
+                                        color: theme.colorScheme.onSurface,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -203,7 +204,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
                                       ex.sets,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: AppColors.textSecondaryDark,
+                                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                                       ),
                                     ),
                                   ],
@@ -289,12 +290,15 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Column(
         children: [
@@ -305,7 +309,7 @@ class _StatCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 2),
@@ -313,7 +317,7 @@ class _StatCard extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
-              color: AppColors.textSecondaryDark,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             ),
           ),
         ],

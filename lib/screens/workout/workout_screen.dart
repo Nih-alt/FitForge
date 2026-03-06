@@ -244,8 +244,11 @@ class WorkoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.put(WorkoutController());
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Obx(() {
         final filtered = c.filteredWorkouts;
 
@@ -256,8 +259,8 @@ class WorkoutScreen extends StatelessWidget {
             SliverAppBar(
               expandedHeight: 100,
               pinned: true,
-              backgroundColor: AppColors.backgroundDark,
-              surfaceTintColor: AppColors.backgroundDark,
+              backgroundColor: theme.scaffoldBackgroundColor,
+              surfaceTintColor: theme.scaffoldBackgroundColor,
               elevation: 0,
               scrolledUnderElevation: 0,
               flexibleSpace: FlexibleSpaceBar(
@@ -271,7 +274,7 @@ class WorkoutScreen extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     Text(
@@ -279,7 +282,7 @@ class WorkoutScreen extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondaryDark,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                       ),
                     ),
                   ],
@@ -355,7 +358,7 @@ class WorkoutScreen extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -469,12 +472,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   }
 
   Widget _buildContent(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.72,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A1A27),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -491,7 +496,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.textSecondaryDark.withAlpha(80),
+                    color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(80),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -507,7 +512,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   GestureDetector(
@@ -661,7 +666,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
       style: GoogleFonts.poppins(
         fontSize: 15,
         fontWeight: FontWeight.w600,
-        color: AppColors.white,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -682,6 +687,8 @@ class _FilterPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -690,18 +697,18 @@ class _FilterPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           gradient: isSelected ? AppColors.accentGradient : null,
-          color: isSelected ? null : AppColors.backgroundDark,
+          color: isSelected ? null : theme.scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(20),
           border: isSelected
               ? null
-              : Border.all(color: AppColors.cardBorderDark),
+              : Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
         ),
         child: Text(
           label,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? AppColors.white : AppColors.textSecondaryDark,
+            color: isSelected ? AppColors.white : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
           ),
         ),
       ),
@@ -762,6 +769,8 @@ class _CategoryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -770,11 +779,11 @@ class _CategoryPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           gradient: isSelected ? AppColors.accentGradient : null,
-          color: isSelected ? null : AppColors.cardDark,
+          color: isSelected ? null : theme.cardTheme.color,
           borderRadius: BorderRadius.circular(20),
           border: isSelected
               ? null
-              : Border.all(color: AppColors.cardBorderDark),
+              : Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
         ),
         child: Center(
           child: Text(
@@ -784,7 +793,7 @@ class _CategoryPill extends StatelessWidget {
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected
                   ? AppColors.white
-                  : AppColors.textSecondaryDark,
+                  : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
             ),
           ),
         ),
@@ -804,13 +813,15 @@ class _FeaturedWorkoutBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       height: 180,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: AppColors.cardDark,
-        border: Border.all(color: AppColors.cardBorderDark),
+        color: theme.cardTheme.color,
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
         boxShadow: [
           BoxShadow(
             color: AppColors.accentOrange.withAlpha(20),
@@ -891,7 +902,7 @@ class _FeaturedWorkoutBanner extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.white,
+                    color: theme.colorScheme.onSurface,
                     height: 1.2,
                   ),
                 ),
@@ -905,7 +916,7 @@ class _FeaturedWorkoutBanner extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
-                          color: AppColors.textSecondaryDark,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         ),
                       ),
                     ),
@@ -986,8 +997,10 @@ class _WorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Material(
-      color: AppColors.cardDark,
+      color: theme.cardTheme.color,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -998,7 +1011,7 @@ class _WorkoutCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: Row(
             children: [
@@ -1029,7 +1042,7 @@ class _WorkoutCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -1040,7 +1053,7 @@ class _WorkoutCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondaryDark,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                       ),
                     ),
                   ],
@@ -1075,9 +1088,9 @@ class _WorkoutCard extends StatelessWidget {
               const SizedBox(width: 6),
 
               // ── Chevron ───────────────────────────────────────────────
-              const Icon(
+              Icon(
                 CupertinoIcons.chevron_right,
-                color: AppColors.textSecondaryDark,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 size: 16,
               ),
             ],

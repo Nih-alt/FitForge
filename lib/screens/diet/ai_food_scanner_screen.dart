@@ -264,7 +264,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: switch (_state) {
         _ScanState.camera => _buildCameraView(),
         _ScanState.loading => _buildLoadingView(),
@@ -386,8 +386,8 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  AppColors.backgroundDark.withValues(alpha: 0.8),
-                  AppColors.backgroundDark,
+                  Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.8),
+                  Theme.of(context).scaffoldBackgroundColor,
                 ],
               ),
             ),
@@ -503,7 +503,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               )
                   .animate(onPlay: (c) => c.repeat(reverse: true))
@@ -515,7 +515,9 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                 'Detecting ingredients & nutrition',
                 style: GoogleFonts.inter(
                   fontSize: 13,
-                  color: AppColors.textSecondaryDark,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
               ),
             ],
@@ -550,10 +552,10 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: AppColors.cardDark,
+                      color: Theme.of(context).cardTheme.color,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(CupertinoIcons.back, color: Colors.white, size: 20),
+                    child: Icon(CupertinoIcons.back, color: Theme.of(context).colorScheme.onSurface, size: 20),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -562,7 +564,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -626,7 +628,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.cardDark,
+                      color: Theme.of(context).cardTheme.color,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.accentOrange.withValues(alpha: 0.3)),
                     ),
@@ -637,7 +639,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -734,7 +736,9 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondaryDark,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(height: 28),
@@ -757,7 +761,9 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
                   'Go Back',
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: AppColors.textSecondaryDark,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
                   ),
                 ),
               ),
@@ -780,18 +786,20 @@ class _DetectedFoodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Name & portion
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -801,7 +809,7 @@ class _DetectedFoodCard extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -820,19 +828,18 @@ class _DetectedFoodCard extends StatelessWidget {
             food.portion,
             style: GoogleFonts.inter(
               fontSize: 12,
-              color: AppColors.textSecondaryDark,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             ),
           ),
           const SizedBox(height: 10),
 
-          // Confidence bar
           Row(
             children: [
               Text(
                 'Confidence',
                 style: GoogleFonts.inter(
                   fontSize: 11,
-                  color: AppColors.textSecondaryDark,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(width: 8),
@@ -853,7 +860,7 @@ class _DetectedFoodCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondaryDark,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 ),
               ),
             ],
@@ -919,6 +926,7 @@ class _SummaryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Text(
@@ -933,7 +941,7 @@ class _SummaryItem extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             fontSize: 11,
-            color: AppColors.textSecondaryDark,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
           ),
         ),
       ],

@@ -3,9 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
+import '../../controllers/user_controller.dart';
 import '../../theme/app_colors.dart';
 import '../diet/diet_screen.dart';
 import '../profile/profile_screen.dart';
@@ -29,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: IndexedStack(
         index: _currentTab,
         children: const [
@@ -45,11 +46,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceDark,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         border: Border(
-          top: BorderSide(color: AppColors.cardBorderDark, width: 0.5),
+          top: BorderSide(
+            color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
+            width: 0.5,
+          ),
         ),
       ),
       child: SafeArea(
@@ -57,9 +64,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: CupertinoTabBar(
           currentIndex: _currentTab,
           onTap: (i) => setState(() => _currentTab = i),
-          backgroundColor: AppColors.surfaceDark,
+          backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           activeColor: AppColors.accentOrange,
-          inactiveColor: AppColors.textSecondaryDark,
+          inactiveColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
           iconSize: 24,
           height: 56,
           border: const Border(),
@@ -100,8 +107,10 @@ class _HomeDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box('user_profile');
-    final name = box.get('name', defaultValue: 'Athlete') as String;
+    final userCtrl = Get.find<UserController>();
+
+    return Obx(() {
+    final name = userCtrl.user.value?.name ?? 'Athlete';
     final firstName = name.split(' ').first;
 
     return CustomScrollView(
@@ -169,6 +178,7 @@ class _HomeDashboard extends StatelessWidget {
         ),
       ],
     );
+    });
   }
 }
 
@@ -200,6 +210,8 @@ class _AppBarRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final initials = name.isNotEmpty ? name[0].toUpperCase() : 'A';
 
     return Row(
@@ -213,7 +225,7 @@ class _AppBarRow extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.white,
+                  color: theme.colorScheme.onSurface,
                   height: 1.3,
                 ),
               ),
@@ -223,7 +235,7 @@ class _AppBarRow extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondaryDark,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 ),
               ),
             ],
@@ -235,13 +247,13 @@ class _AppBarRow extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
-          child: const Icon(
+          child: Icon(
             CupertinoIcons.bell,
-            color: AppColors.white,
+            color: theme.colorScheme.onSurface,
             size: 20,
           ),
         ),
@@ -291,12 +303,15 @@ class _DailyScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
         boxShadow: [
           BoxShadow(
             color: AppColors.accentOrange.withAlpha(15),
@@ -317,7 +332,7 @@ class _DailyScoreCard extends StatelessWidget {
               curve: Curves.easeOutCubic,
               builder: (context, value, child) {
                 return CustomPaint(
-                  painter: _RingPainter(progress: value),
+                  painter: _RingPainter(progress: value, isDark: isDark),
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -327,7 +342,7 @@ class _DailyScoreCard extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 48,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.white,
+                            color: theme.colorScheme.onSurface,
                             height: 1,
                           ),
                         ),
@@ -337,7 +352,7 @@ class _DailyScoreCard extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.textSecondaryDark,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                           ),
                         ),
                       ],
@@ -360,14 +375,14 @@ class _DailyScoreCard extends StatelessWidget {
                 label: 'kcal',
                 color: AppColors.accentOrange,
               ),
-              Container(width: 1, height: 36, color: AppColors.cardBorderDark),
+              Container(width: 1, height: 36, color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
               _MiniStat(
                 icon: CupertinoIcons.arrow_right_arrow_left,
                 value: _formatSteps(steps),
                 label: 'steps',
                 color: AppColors.accentGold,
               ),
-              Container(width: 1, height: 36, color: AppColors.cardBorderDark),
+              Container(width: 1, height: 36, color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
               _MiniStat(
                 icon: CupertinoIcons.timer,
                 value: '$activeMin',
@@ -402,6 +417,9 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -412,7 +430,7 @@ class _MiniStat extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.white,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         Text(
@@ -420,7 +438,7 @@ class _MiniStat extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 11,
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondaryDark,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
           ),
         ),
       ],
@@ -431,9 +449,10 @@ class _MiniStat extends StatelessWidget {
 // ── Ring Painter ────────────────────────────────────────────────────────────
 
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.progress});
+  _RingPainter({required this.progress, required this.isDark});
 
   final double progress;
+  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -443,7 +462,7 @@ class _RingPainter extends CustomPainter {
 
     // Track
     final trackPaint = Paint()
-      ..color = const Color(0x10FFFFFF)
+      ..color = isDark ? const Color(0x10FFFFFF) : const Color(0x15000000)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -475,7 +494,7 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress || oldDelegate.isDark != isDark;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -487,6 +506,9 @@ class _TodaysWorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -495,16 +517,16 @@ class _TodaysWorkoutCard extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.white,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: Row(
             children: [
@@ -518,7 +540,7 @@ class _TodaysWorkoutCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -527,7 +549,7 @@ class _TodaysWorkoutCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondaryDark,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -643,12 +665,15 @@ class _QuickStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Column(
         children: [
@@ -667,7 +692,7 @@ class _QuickStatCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 2),
@@ -676,7 +701,7 @@ class _QuickStatCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: AppColors.textSecondaryDark,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             ),
           ),
         ],
@@ -697,6 +722,8 @@ class _WeeklyProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final today = DateTime.now().weekday - 1; // 0 = Monday
 
     return Column(
@@ -707,16 +734,16 @@ class _WeeklyProgress extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.white,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -748,6 +775,8 @@ class _DayPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
         // Activity bar
@@ -755,7 +784,7 @@ class _DayPill extends StatelessWidget {
           width: 30,
           height: 56,
           decoration: BoxDecoration(
-            color: const Color(0x10FFFFFF),
+            color: isDark ? const Color(0x10FFFFFF) : const Color(0x15000000),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Align(
@@ -792,7 +821,9 @@ class _DayPill extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: isToday ? FontWeight.w600 : FontWeight.w400,
-              color: isToday ? AppColors.white : AppColors.textSecondaryDark,
+              color: isToday
+                  ? AppColors.white
+                  : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
             ),
           ),
         ),
@@ -850,4 +881,3 @@ class _MotivationalBanner extends StatelessWidget {
     );
   }
 }
-

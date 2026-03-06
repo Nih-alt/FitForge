@@ -188,8 +188,10 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Obx(() {
           final idx = _ctrl.currentExerciseIndex.value;
@@ -390,6 +392,9 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
@@ -401,13 +406,15 @@ class _TopBar extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.cardDark,
+                color: theme.cardTheme.color,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.cardBorderDark),
+                border: Border.all(
+                  color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
+                ),
               ),
-              child: const Icon(
+              child: Icon(
                 CupertinoIcons.xmark,
-                color: AppColors.textSecondaryDark,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 size: 16,
               ),
             ),
@@ -423,7 +430,7 @@ class _TopBar extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white,
+                color: theme.colorScheme.onSurface,
                 decoration: TextDecoration.none,
               ),
             ),
@@ -434,9 +441,11 @@ class _TopBar extends StatelessWidget {
             () => Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.cardDark,
+                color: theme.cardTheme.color,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.cardBorderDark),
+                border: Border.all(
+                  color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
+                ),
               ),
               child: Text(
                 controller.elapsedFormatted,
@@ -473,6 +482,8 @@ class _WorkoutProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -485,7 +496,7 @@ class _WorkoutProgressBar extends StatelessWidget {
               children: [
                 // Track
                 Container(
-                  color: AppColors.cardDark,
+                  color: theme.cardTheme.color,
                   width: double.infinity,
                 ),
                 // Gradient fill
@@ -524,6 +535,7 @@ class _ExerciseHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final displaySets = exercise.setsReps.replaceAll(' x ', ' × ');
 
     return Container(
@@ -540,7 +552,7 @@ class _ExerciseHeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: theme.cardTheme.color,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Stack(
@@ -599,7 +611,7 @@ class _ExerciseHeroCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                       height: 1.2,
                       decoration: TextDecoration.none,
                     ),
@@ -648,19 +660,24 @@ class _HeroTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(
+          color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
+        ),
       ),
       child: Text(
         label,
         style: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: AppColors.textSecondaryDark,
+          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
           decoration: TextDecoration.none,
         ),
       ),
@@ -686,6 +703,8 @@ class _SetTracker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final remaining = totalSets - doneSets;
 
     return Column(
@@ -700,7 +719,7 @@ class _SetTracker extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondaryDark,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 decoration: TextDecoration.none,
               ),
             ),
@@ -711,7 +730,7 @@ class _SetTracker extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: allDone
                     ? AppColors.success
-                    : AppColors.textSecondaryDark,
+                    : isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 decoration: TextDecoration.none,
               ),
             ),
@@ -754,6 +773,9 @@ class _SetCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
@@ -762,13 +784,13 @@ class _SetCircle extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: isDone ? AppColors.accentGradient : null,
-        color: isDone ? null : AppColors.cardDark,
+        color: isDone ? null : theme.cardTheme.color,
         border: Border.all(
           color: isDone
               ? AppColors.transparent
               : isCurrent
                   ? AppColors.accentOrange
-                  : AppColors.cardBorderDark,
+                  : isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
           width: isCurrent ? 2 : 1,
         ),
         boxShadow: isCurrent
@@ -794,8 +816,8 @@ class _SetCircle extends StatelessWidget {
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: isCurrent
-                      ? AppColors.white
-                      : AppColors.textSecondaryDark,
+                      ? theme.colorScheme.onSurface
+                      : isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   decoration: TextDecoration.none,
                 ),
               ),
@@ -815,6 +837,9 @@ class _RestTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -823,7 +848,7 @@ class _RestTimer extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondaryDark,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             letterSpacing: 1.5,
             decoration: TextDecoration.none,
           ),
@@ -843,7 +868,12 @@ class _RestTimer extends StatelessWidget {
               children: [
                 CustomPaint(
                   size: const Size(120, 120),
-                  painter: _RestRingPainter(progress: progress),
+                  painter: _RestRingPainter(
+                    progress: progress,
+                    trackColor: isDark
+                        ? const Color(0x10FFFFFF)
+                        : const Color(0x15000000),
+                  ),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
@@ -853,7 +883,7 @@ class _RestTimer extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 40,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.white,
+                        color: theme.colorScheme.onSurface,
                         height: 1,
                         decoration: TextDecoration.none,
                       ),
@@ -862,7 +892,7 @@ class _RestTimer extends StatelessWidget {
                       'sec',
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: AppColors.textSecondaryDark,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         decoration: TextDecoration.none,
                       ),
                     ),
@@ -897,9 +927,10 @@ class _RestTimer extends StatelessWidget {
 // ── Rest ring CustomPainter ───────────────────────────────────────────────
 
 class _RestRingPainter extends CustomPainter {
-  const _RestRingPainter({required this.progress});
+  const _RestRingPainter({required this.progress, required this.trackColor});
 
   final double progress;
+  final Color trackColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -908,7 +939,7 @@ class _RestRingPainter extends CustomPainter {
     const strokeWidth = 8.0;
 
     final trackPaint = Paint()
-      ..color = const Color(0x15FFFFFF)
+      ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -937,7 +968,8 @@ class _RestRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_RestRingPainter old) => old.progress != progress;
+  bool shouldRepaint(_RestRingPainter old) =>
+      old.progress != progress || old.trackColor != trackColor;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -964,6 +996,8 @@ class _CompleteSetButtonState extends State<_CompleteSetButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isDisabled = widget.isResting || widget.allDone;
 
     return GestureDetector(
@@ -983,8 +1017,10 @@ class _CompleteSetButtonState extends State<_CompleteSetButton> {
           width: double.infinity,
           decoration: BoxDecoration(
             gradient: isDisabled
-                ? const LinearGradient(
-                    colors: [Color(0xFF22223A), Color(0xFF2A2A44)],
+                ? LinearGradient(
+                    colors: isDark
+                        ? const [Color(0xFF22223A), Color(0xFF2A2A44)]
+                        : [Colors.grey.shade300, Colors.grey.shade400],
                   )
                 : AppColors.accentGradient,
             borderRadius: BorderRadius.circular(12),
@@ -1009,7 +1045,7 @@ class _CompleteSetButtonState extends State<_CompleteSetButton> {
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: isDisabled
-                    ? AppColors.textSecondaryDark
+                    ? isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight
                     : AppColors.white,
                 decoration: TextDecoration.none,
               ),
@@ -1042,9 +1078,13 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardTheme.color;
+
     return Row(
       children: [
-        // Previous — #1A1A27 background, white text
+        // Previous — card background, onSurface text
         Expanded(
           child: GestureDetector(
             onTap: isFirst ? null : onPrevious,
@@ -1052,8 +1092,8 @@ class _BottomNav extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: isFirst
-                    ? AppColors.cardDark.withAlpha(80)
-                    : AppColors.cardDark,
+                    ? cardColor?.withAlpha(80)
+                    : cardColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -1063,8 +1103,8 @@ class _BottomNav extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: isFirst
-                        ? AppColors.textSecondaryDark.withAlpha(80)
-                        : AppColors.white,
+                        ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(80)
+                        : theme.colorScheme.onSurface,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -1134,12 +1174,14 @@ class _FinishOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
 
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: AppColors.backgroundDark,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: Stack(
           children: [
             // Floating particles
@@ -1205,7 +1247,7 @@ class _FinishOverlay extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 32,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.white,
+                        color: theme.colorScheme.onSurface,
                         height: 1.2,
                         decoration: TextDecoration.none,
                       ),
@@ -1223,7 +1265,7 @@ class _FinishOverlay extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondaryDark,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         decoration: TextDecoration.none,
                       ),
                     )
@@ -1306,12 +1348,17 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(
+          color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
+        ),
       ),
       child: Column(
         children: [
@@ -1322,7 +1369,7 @@ class _StatCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: theme.colorScheme.onSurface,
               height: 1,
               decoration: TextDecoration.none,
             ),
@@ -1333,7 +1380,7 @@ class _StatCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w400,
-              color: AppColors.textSecondaryDark,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
               decoration: TextDecoration.none,
             ),
           ),

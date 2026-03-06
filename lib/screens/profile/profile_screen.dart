@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../controllers/theme_controller.dart';
+import '../../controllers/user_controller.dart';
 import '../../theme/app_colors.dart';
 import '../onboarding/onboarding_screen.dart';
 
@@ -24,49 +25,38 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late final Box _box;
-  String _name = 'Athlete';
-  String _goal = 'Build Muscle';
-  int _age = 25;
-  double _weight = 75.0;
-  double _height = 175.0;
-  String? _avatarPath;
+  final UserController _userCtrl = Get.find<UserController>();
 
-  // Notification toggles
-  bool _workoutReminders = true;
-  bool _progressUpdates = true;
-  bool _dietReminders = false;
-
-  // Settings
-  String _units = 'Metric';
-
-  @override
-  void initState() {
-    super.initState();
-    _box = Hive.box('user_profile');
-    _loadProfile();
+  // Convenience getters from reactive state
+  String get _name => _userCtrl.user.value?.name ?? 'Athlete';
+  String get _goal => _userCtrl.user.value?.goal ?? 'Build Muscle';
+  int get _age => _userCtrl.user.value?.age ?? 25;
+  double get _weight => _userCtrl.user.value?.weight ?? 75.0;
+  double get _height => _userCtrl.user.value?.height ?? 175.0;
+  String? get _avatarPath {
+    final path = _userCtrl.user.value?.profilePhotoPath;
+    return (path != null && path.isNotEmpty) ? path : null;
   }
 
-  void _loadProfile() {
-    setState(() {
-      _name = _box.get('name', defaultValue: 'Athlete') as String;
-      _goal = _box.get('goal', defaultValue: 'Build Muscle') as String;
-      _age = _box.get('age', defaultValue: 25) as int;
-      _weight = (_box.get('weight', defaultValue: 75.0) as num).toDouble();
-      _height = (_box.get('height', defaultValue: 175.0) as num).toDouble();
-      _avatarPath = _box.get('avatar_path') as String?;
-      _workoutReminders = _box.get('notif_workout', defaultValue: true) as bool;
-      _progressUpdates = _box.get('notif_progress', defaultValue: true) as bool;
-      _dietReminders = _box.get('notif_diet', defaultValue: false) as bool;
-      _units = _box.get('units', defaultValue: 'Metric') as String;
-    });
-  }
+  // Settings getters
+  bool get _workoutReminders => _userCtrl.settings.value.workoutReminderOn;
+  bool get _progressUpdates => _userCtrl.settings.value.progressUpdateOn;
+  bool get _dietReminders => _userCtrl.settings.value.mealReminderOn;
+  String get _units => _userCtrl.settings.value.weightUnit == 'kg' ? 'Metric' : 'Imperial';
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: Column(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Obx(() {
+        // Touch reactive values so Obx rebuilds on changes
+        _userCtrl.user.value;
+        _userCtrl.settings.value;
+
+        return Column(
         children: [
           // App bar
           SafeArea(
@@ -80,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const Spacer(),
@@ -198,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       'FitForge v1.0.0',
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: AppColors.textSecondaryDark.withAlpha(120),
+                        color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(120),
                       ),
                     ),
                   ),
@@ -209,7 +199,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 
@@ -218,15 +209,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ════════════════════════════════════════════════════════════════════════════
 
   Widget _buildProfileHero() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final initials = _name.isNotEmpty ? _name[0].toUpperCase() : 'A';
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Column(
         children: [
@@ -273,7 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: AppColors.accentOrange,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.cardDark,
+                        color: theme.cardTheme.color ?? AppColors.cardDark,
                         width: 2.5,
                       ),
                     ),
@@ -295,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: GoogleFonts.poppins(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -328,7 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 width: 1,
                 height: 32,
-                color: AppColors.cardBorderDark,
+                color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
               ),
               _HeroStat(
                 value: '${_weight.toStringAsFixed(1)} ${_units == 'Metric' ? 'kg' : 'lbs'}',
@@ -337,7 +330,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 width: 1,
                 height: 32,
-                color: AppColors.cardBorderDark,
+                color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
               ),
               _HeroStat(
                 value: '${_height.toStringAsFixed(0)} ${_units == 'Metric' ? 'cm' : 'in'}',
@@ -392,8 +385,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     .map((g) => CupertinoActionSheetAction(
                           onPressed: () {
                             Navigator.pop(context);
-                            setState(() => _goal = g);
-                            _box.put('goal', g);
+                            _userCtrl.updateUser(goal: g);
                           },
                           child: Text(
                             g,
@@ -421,13 +413,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: CupertinoIcons.chart_bar_alt_fill,
           iconColor: AppColors.accentGold,
           label: 'Weekly Workout Target',
-          trailing: Text(
-            '${_box.get('weekly_target', defaultValue: 4)} days',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: AppColors.textSecondaryDark,
-            ),
-          ),
+          trailing: Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Text(
+              '${_userCtrl.settings.value.weeklyWorkoutGoal} days',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              ),
+            );
+          }),
           onTap: () => _showWeeklyTargetPicker(),
         ),
       ],
@@ -435,14 +430,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showWeeklyTargetPicker() {
-    int selected = _box.get('weekly_target', defaultValue: 4) as int;
+    int selected = _userCtrl.settings.value.weeklyWorkoutGoal;
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) => Container(
+      builder: (_) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        return Container(
         height: 280,
-        decoration: const BoxDecoration(
-          color: AppColors.cardDark,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
@@ -456,7 +454,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Text(
                       'Cancel',
                       style: GoogleFonts.inter(
-                        color: AppColors.textSecondaryDark,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -466,7 +464,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   CupertinoButton(
@@ -479,8 +477,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     onPressed: () {
-                      _box.put('weekly_target', selected);
-                      setState(() {});
+                      _userCtrl.updateSettings(weeklyWorkoutGoal: selected);
                       Navigator.pop(context);
                     },
                   ),
@@ -504,7 +501,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       '${i + 1} day${i > 0 ? 's' : ''} / week',
                       style: GoogleFonts.inter(
                         fontSize: 18,
-                        color: AppColors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -513,7 +510,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
-      ),
+      );
+      },
     );
   }
 
@@ -532,19 +530,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: CupertinoIcons.device_phone_portrait,
             label: 'System Default',
             selected: mode == ThemeMode.system,
-            onTap: () => tc.setThemeMode(ThemeMode.system),
+            onTap: () {
+              tc.setThemeMode('system');
+              _userCtrl.loadSettings();
+            },
           ),
           _ThemeOption(
             icon: CupertinoIcons.sun_max_fill,
             label: 'Light Mode',
             selected: mode == ThemeMode.light,
-            onTap: () => tc.setThemeMode(ThemeMode.light),
+            onTap: () {
+              tc.setThemeMode('light');
+              _userCtrl.loadSettings();
+            },
           ),
           _ThemeOption(
             icon: CupertinoIcons.moon_fill,
             label: 'Dark Mode',
             selected: mode == ThemeMode.dark,
-            onTap: () => tc.setThemeMode(ThemeMode.dark),
+            onTap: () {
+              tc.setThemeMode('dark');
+              _userCtrl.loadSettings();
+            },
           ),
         ],
       );
@@ -563,30 +570,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           iconColor: AppColors.accentOrange,
           label: 'Workout Reminders',
           value: _workoutReminders,
-          onChanged: (v) {
-            setState(() => _workoutReminders = v);
-            _box.put('notif_workout', v);
-          },
+          onChanged: (v) => _userCtrl.updateSettings(workoutReminderOn: v),
         ),
         _SwitchRow(
           icon: CupertinoIcons.chart_bar_fill,
           iconColor: AppColors.success,
           label: 'Progress Updates',
           value: _progressUpdates,
-          onChanged: (v) {
-            setState(() => _progressUpdates = v);
-            _box.put('notif_progress', v);
-          },
+          onChanged: (v) => _userCtrl.updateSettings(progressUpdateOn: v),
         ),
         _SwitchRow(
           icon: CupertinoIcons.leaf_arrow_circlepath,
           iconColor: AppColors.accentGold,
           label: 'Diet Reminders',
           value: _dietReminders,
-          onChanged: (v) {
-            setState(() => _dietReminders = v);
-            _box.put('notif_diet', v);
-          },
+          onChanged: (v) => _userCtrl.updateSettings(mealReminderOn: v),
         ),
       ],
     );
@@ -603,13 +601,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: CupertinoIcons.compass,
           iconColor: const Color(0xFF4DA6FF),
           label: 'Units',
-          trailing: Text(
-            _units,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: AppColors.textSecondaryDark,
-            ),
-          ),
+          trailing: Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Text(
+              _units,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              ),
+            );
+          }),
           onTap: () {
             showCupertinoModalPopup<void>(
               context: context,
@@ -625,8 +626,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     .map((u) => CupertinoActionSheetAction(
                           onPressed: () {
                             Navigator.pop(context);
-                            setState(() => _units = u);
-                            _box.put('units', u);
+                            _userCtrl.updateSettings(
+                              weightUnit: u == 'Metric' ? 'kg' : 'lbs',
+                              heightUnit: u == 'Metric' ? 'cm' : 'ft',
+                            );
                           },
                           child: Text(
                             u,
@@ -652,13 +655,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         _SettingsRow(
           icon: CupertinoIcons.info_circle_fill,
-          iconColor: AppColors.textSecondaryDark,
           label: 'About FitForge',
-          trailing: const Icon(
-            CupertinoIcons.chevron_forward,
-            size: 16,
-            color: AppColors.textSecondaryDark,
-          ),
           onTap: () => _showAbout(),
         ),
       ],
@@ -666,13 +663,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showAbout() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.cardDark,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
           top: false,
@@ -683,7 +682,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondaryDark.withAlpha(60),
+                  color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -707,7 +706,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.white,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
@@ -715,7 +714,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 'Version 1.0.0',
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: AppColors.textSecondaryDark,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(height: 16),
@@ -724,7 +723,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: AppColors.textSecondaryDark,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   height: 1.5,
                 ),
               ),
@@ -747,33 +746,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: CupertinoIcons.lock_fill,
           iconColor: const Color(0xFFAA7BF7),
           label: 'Privacy Policy',
-          trailing: const Icon(
+          trailing: Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Icon(
             CupertinoIcons.chevron_forward,
             size: 16,
-            color: AppColors.textSecondaryDark,
-          ),
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+          );
+          }),
           onTap: _showPrivacyPolicy,
         ),
         _SettingsRow(
           icon: CupertinoIcons.doc_text_fill,
           iconColor: const Color(0xFF4DA6FF),
           label: 'Terms of Service',
-          trailing: const Icon(
+          trailing: Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Icon(
             CupertinoIcons.chevron_forward,
             size: 16,
-            color: AppColors.textSecondaryDark,
-          ),
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+          );
+          }),
           onTap: _showTermsOfService,
         ),
         _SettingsRow(
           icon: CupertinoIcons.shield_fill,
           iconColor: AppColors.success,
           label: 'Data & Storage',
-          trailing: const Icon(
+          trailing: Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Icon(
             CupertinoIcons.chevron_forward,
             size: 16,
-            color: AppColors.textSecondaryDark,
-          ),
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+          );
+          }),
           onTap: _showDataAndStorage,
         ),
       ],
@@ -944,7 +952,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isDestructiveAction: true,
             onPressed: () async {
               Navigator.pop(context);
-              await _box.clear();
+              try {
+                await _userCtrl.clearAllData();
+                final legacyBox = Hive.box('user_profile');
+                await legacyBox.clear();
+              } catch (_) {}
               if (!mounted) return;
               Get.offAll(() => OnboardingScreen());
             },
@@ -984,6 +996,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ════════════════════════════════════════════════════════════════════════════
 
   void _showEditProfile() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final nameCtrl = TextEditingController(text: _name);
     final ageCtrl = TextEditingController(text: '$_age');
     final weightCtrl = TextEditingController(text: _weight.toStringAsFixed(1));
@@ -996,9 +1010,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: Container(
-          decoration: const BoxDecoration(
-            color: AppColors.cardDark,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           child: SafeArea(
@@ -1012,7 +1026,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.textSecondaryDark.withAlpha(60),
+                      color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1024,7 +1038,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -1062,12 +1076,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       final newHeight =
                           double.tryParse(heightCtrl.text.trim()) ?? _height;
 
-                      _box.put('name', newName.isNotEmpty ? newName : 'Athlete');
-                      _box.put('age', newAge);
-                      _box.put('weight', newWeight);
-                      _box.put('height', newHeight);
-
-                      _loadProfile();
+                      _userCtrl.updateUser(
+                        name: newName.isNotEmpty ? newName : 'Athlete',
+                        age: newAge,
+                        weight: newWeight,
+                        height: newHeight,
+                      );
                       Navigator.pop(context);
                     },
                     child: Container(
@@ -1127,8 +1141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               final picked = await ImagePicker()
                   .pickImage(source: ImageSource.camera, maxWidth: 512);
               if (picked != null) {
-                setState(() => _avatarPath = picked.path);
-                _box.put('avatar_path', picked.path);
+                _userCtrl.updateUser(profilePhotoPath: picked.path);
               }
             },
             child: const Text('Take Photo'),
@@ -1139,8 +1152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               final picked = await ImagePicker()
                   .pickImage(source: ImageSource.gallery, maxWidth: 512);
               if (picked != null) {
-                setState(() => _avatarPath = picked.path);
-                _box.put('avatar_path', picked.path);
+                _userCtrl.updateUser(profilePhotoPath: picked.path);
               }
             },
             child: const Text('Choose from Gallery'),
@@ -1150,8 +1162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               isDestructiveAction: true,
               onPressed: () {
                 Navigator.pop(context);
-                setState(() => _avatarPath = null);
-                _box.delete('avatar_path');
+                _userCtrl.updateUser(profilePhotoPath: '');
               },
               child: const Text('Remove Photo'),
             ),
@@ -1174,7 +1185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       style: GoogleFonts.poppins(
         fontSize: 18,
         fontWeight: FontWeight.w700,
-        color: AppColors.white,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -1192,6 +1203,8 @@ class _HeroStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1200,7 +1213,7 @@ class _HeroStat extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: AppColors.white,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 2),
@@ -1208,7 +1221,7 @@ class _HeroStat extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             fontSize: 12,
-            color: AppColors.textSecondaryDark,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
           ),
         ),
       ],
@@ -1223,11 +1236,13 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
       child: Column(children: children),
     );
@@ -1238,7 +1253,7 @@ class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
     required this.icon,
     required this.label,
-    this.iconColor = AppColors.textSecondaryDark,
+    this.iconColor,
     this.trailing,
     this.onTap,
     this.labelColor,
@@ -1247,7 +1262,7 @@ class _SettingsRow extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final Color iconColor;
+  final Color? iconColor;
   final Widget? trailing;
   final VoidCallback? onTap;
   final Color? labelColor;
@@ -1255,6 +1270,10 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final effectiveIconColor = iconColor ?? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight);
+
     return Column(
       children: [
         GestureDetector(
@@ -1268,10 +1287,10 @@ class _SettingsRow extends StatelessWidget {
                   width: 34,
                   height: 34,
                   decoration: BoxDecoration(
-                    color: iconColor.withAlpha(18),
+                    color: effectiveIconColor.withAlpha(18),
                     borderRadius: BorderRadius.circular(9),
                   ),
-                  child: Icon(icon, color: iconColor, size: 17),
+                  child: Icon(icon, color: effectiveIconColor, size: 17),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -1280,7 +1299,7 @@ class _SettingsRow extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: labelColor ?? AppColors.white,
+                      color: labelColor ?? theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -1294,7 +1313,7 @@ class _SettingsRow extends StatelessWidget {
             padding: const EdgeInsets.only(left: 64),
             child: Container(
               height: 0.5,
-              color: AppColors.cardBorderDark,
+              color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight,
             ),
           ),
       ],
@@ -1308,17 +1327,21 @@ class _SwitchRow extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
-    this.iconColor = AppColors.textSecondaryDark,
+    this.iconColor,
   });
 
   final IconData icon;
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
-  final Color iconColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final effectiveIconColor = iconColor ?? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
@@ -1327,10 +1350,10 @@ class _SwitchRow extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: iconColor.withAlpha(18),
+              color: effectiveIconColor.withAlpha(18),
               borderRadius: BorderRadius.circular(9),
             ),
-            child: Icon(icon, color: iconColor, size: 17),
+            child: Icon(icon, color: effectiveIconColor, size: 17),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1339,7 +1362,7 @@ class _SwitchRow extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.white,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -1369,6 +1392,10 @@ class _ThemeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final inactiveColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -1380,7 +1407,7 @@ class _ThemeOption extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: (selected ? AppColors.accentOrange : AppColors.textSecondaryDark)
+                color: (selected ? AppColors.accentOrange : inactiveColor)
                     .withAlpha(18),
                 borderRadius: BorderRadius.circular(9),
               ),
@@ -1388,7 +1415,7 @@ class _ThemeOption extends StatelessWidget {
                 icon,
                 color: selected
                     ? AppColors.accentOrange
-                    : AppColors.textSecondaryDark,
+                    : inactiveColor,
                 size: 17,
               ),
             ),
@@ -1399,7 +1426,7 @@ class _ThemeOption extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.white,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ),
@@ -1429,6 +1456,9 @@ class _SheetField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return CupertinoTextField(
       controller: controller,
       placeholder: label,
@@ -1436,16 +1466,16 @@ class _SheetField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       style: GoogleFonts.inter(
         fontSize: 15,
-        color: AppColors.white,
+        color: theme.colorScheme.onSurface,
       ),
       placeholderStyle: GoogleFonts.inter(
         fontSize: 15,
-        color: AppColors.textSecondaryDark,
+        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
       ),
     );
   }
@@ -1461,14 +1491,15 @@ class _LegalSheet extends StatelessWidget {
   final String title;
   final List<String> paragraphs;
 
-  static const _bg = Color(0xFF1A1A27);
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: _bg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         top: false,
@@ -1481,7 +1512,7 @@ class _LegalSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1498,7 +1529,7 @@ class _LegalSheet extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -1540,7 +1571,7 @@ class _LegalSheet extends StatelessWidget {
                             p,
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: Colors.white70,
+                              color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                               height: 1.6,
                             ),
                           ),
@@ -1566,14 +1597,15 @@ class _DataStorageSheet extends StatelessWidget {
 
   final BuildContext parentContext;
 
-  static const _bg = Color(0xFF1A1A27);
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: _bg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         top: false,
@@ -1591,7 +1623,7 @@ class _DataStorageSheet extends StatelessWidget {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white24,
+                      color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1609,7 +1641,7 @@ class _DataStorageSheet extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -1636,9 +1668,9 @@ class _DataStorageSheet extends StatelessWidget {
                 // Storage stats card
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.cardDark,
+                    color: isDark ? AppColors.cardDark : AppColors.secondaryLight,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.cardBorderDark),
+                    border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
                   ),
                   child: Column(
                     children: [
@@ -1653,7 +1685,7 @@ class _DataStorageSheet extends StatelessWidget {
                         icon: CupertinoIcons.clear_circled_solid,
                         label: 'Cache',
                         size: '0.8 MB',
-                        sizeColor: AppColors.textSecondaryDark,
+                        sizeColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         showDivider: true,
                       ),
                       _StorageRow(
@@ -1677,7 +1709,7 @@ class _DataStorageSheet extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -1716,7 +1748,7 @@ class _DataStorageSheet extends StatelessWidget {
                     width: double.infinity,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0A0A0F),
+                      color: theme.scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
@@ -1760,7 +1792,7 @@ class _DataStorageSheet extends StatelessWidget {
                     'Cache cleared successfully',
                     style: GoogleFonts.inter(color: Colors.white),
                   ),
-                  backgroundColor: AppColors.cardDark,
+                  backgroundColor: Theme.of(parentContext).cardTheme.color,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1810,13 +1842,15 @@ class _StorageRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(icon, color: AppColors.textSecondaryDark, size: 20),
+              Icon(icon, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight, size: 20),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
@@ -1824,7 +1858,7 @@ class _StorageRow extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -1842,7 +1876,7 @@ class _StorageRow extends StatelessWidget {
         if (showDivider)
           Padding(
             padding: const EdgeInsets.only(left: 50),
-            child: Container(height: 0.5, color: AppColors.cardBorderDark),
+            child: Container(height: 0.5, color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
           ),
       ],
     );

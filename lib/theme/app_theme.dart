@@ -303,7 +303,7 @@ abstract final class AppTheme {
         // ── Input Decoration ───────────────────────────────────────────
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: AppColors.surfaceLight,
+          fillColor: AppColors.cardLight,
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           hintStyle: AppTextStyles.bodyMedium(isDark: false),
           border: OutlineInputBorder(
@@ -330,7 +330,7 @@ abstract final class AppTheme {
 
         // ── Bottom Navigation ──────────────────────────────────────────
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: AppColors.surfaceLight,
+          backgroundColor: AppColors.cardLight,
           selectedItemColor: AppColors.accentOrange,
           unselectedItemColor: AppColors.textSecondaryLight,
           type: BottomNavigationBarType.fixed,
@@ -339,7 +339,7 @@ abstract final class AppTheme {
 
         // ── Navigation Bar (Material 3) ────────────────────────────────
         navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: AppColors.surfaceLight,
+          backgroundColor: AppColors.cardLight,
           indicatorColor: AppColors.accentOrange.withAlpha(30),
           surfaceTintColor: AppColors.transparent,
           elevation: 0,
@@ -350,7 +350,7 @@ abstract final class AppTheme {
 
         // ── Bottom Sheet ───────────────────────────────────────────────
         bottomSheetTheme: const BottomSheetThemeData(
-          backgroundColor: AppColors.surfaceLight,
+          backgroundColor: AppColors.cardLight,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
@@ -358,7 +358,7 @@ abstract final class AppTheme {
 
         // ── Dialog ─────────────────────────────────────────────────────
         dialogTheme: DialogThemeData(
-          backgroundColor: AppColors.surfaceLight,
+          backgroundColor: AppColors.cardLight,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           elevation: 8,
         ),

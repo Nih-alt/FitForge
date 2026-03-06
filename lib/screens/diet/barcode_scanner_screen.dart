@@ -258,33 +258,34 @@ class _ProductResultSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag handle
           Container(
             width: 36,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white24,
+              color: (isDark ? Colors.white : Colors.black).withAlpha(38),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 20),
 
-          // Product info
           Text(
             product.name,
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -292,12 +293,11 @@ class _ProductResultSheet extends StatelessWidget {
             '${product.brand}  •  ${product.barcode}',
             style: GoogleFonts.inter(
               fontSize: 12,
-              color: AppColors.textSecondaryDark,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             ),
           ),
           const SizedBox(height: 16),
 
-          // Macro pills
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -312,13 +312,12 @@ class _ProductResultSheet extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Meal selection
           Text(
             'Add to meal',
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondaryDark,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             ),
           ),
           const SizedBox(height: 12),
@@ -372,15 +371,18 @@ class _MealRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: theme.cardTheme.color,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorderDark),
+          border: Border.all(color: isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight),
         ),
         child: Row(
           children: [
@@ -392,7 +394,7 @@ class _MealRow extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ),

@@ -1,5 +1,5 @@
 // FitForge Diet & Nutrition Screen — Premium nutrition tracking UI.
-// Cupertino-first design with dark theme, gradient accents, animated rings.
+// Cupertino-first design with theme-aware colors, gradient accents, animated rings.
 
 import 'dart:math' as math;
 
@@ -331,8 +331,11 @@ class _DietScreenState extends State<DietScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Obx(() {
         // Touch all reactive values so Obx rebuilds
         _ctrl.selectedDate.value;
@@ -344,7 +347,7 @@ class _DietScreenState extends State<DietScreen> {
         return CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            _buildSliverAppBar(),
+            _buildSliverAppBar(theme, isDark),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList(
@@ -386,9 +389,11 @@ class _DietScreenState extends State<DietScreen> {
     );
   }
 
-  SliverAppBar _buildSliverAppBar() {
+  SliverAppBar _buildSliverAppBar(ThemeData theme, bool isDark) {
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return SliverAppBar(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       pinned: true,
       expandedHeight: 100,
       automaticallyImplyLeading: false,
@@ -406,7 +411,7 @@ class _DietScreenState extends State<DietScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -415,7 +420,7 @@ class _DietScreenState extends State<DietScreen> {
                     children: [
                       GestureDetector(
                         onTap: _ctrl.previousDay,
-                        child: const Icon(CupertinoIcons.chevron_left, size: 12, color: AppColors.textSecondaryDark),
+                        child: Icon(CupertinoIcons.chevron_left, size: 12, color: textSecondary),
                       ),
                       const SizedBox(width: 4),
                       Obx(() => Text(
@@ -423,14 +428,14 @@ class _DietScreenState extends State<DietScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondaryDark,
+                              color: textSecondary,
                               decoration: TextDecoration.none,
                             ),
                           )),
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: _ctrl.nextDay,
-                        child: const Icon(CupertinoIcons.chevron_right, size: 12, color: AppColors.textSecondaryDark),
+                        child: Icon(CupertinoIcons.chevron_right, size: 12, color: textSecondary),
                       ),
                     ],
                   ),
@@ -443,7 +448,7 @@ class _DietScreenState extends State<DietScreen> {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: AppColors.cardDark,
+                  color: theme.cardTheme.color ?? theme.cardColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(CupertinoIcons.barcode_viewfinder, size: 16, color: AppColors.accentOrange),
@@ -456,7 +461,7 @@ class _DietScreenState extends State<DietScreen> {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: AppColors.cardDark,
+                  color: theme.cardTheme.color ?? theme.cardColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(CupertinoIcons.drop_fill, size: 16, color: _kWaterBlue),
@@ -479,9 +484,12 @@ class _CalorieHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final consumed = ctrl.totalCalories;
     final remaining = ctrl.remainingCalories;
     final progress = (consumed / DietController.calorieGoal).clamp(0.0, 1.0);
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Container(
       decoration: BoxDecoration(
@@ -494,7 +502,7 @@ class _CalorieHeroCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: theme.cardTheme.color ?? theme.cardColor,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
@@ -508,7 +516,7 @@ class _CalorieHeroCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondaryDark,
+                    color: textSecondary,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -534,7 +542,7 @@ class _CalorieHeroCard extends StatelessWidget {
                   children: [
                     Container(
                       width: double.infinity,
-                      color: AppColors.backgroundDark,
+                      color: theme.scaffoldBackgroundColor,
                     ),
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0, end: progress),
@@ -561,7 +569,7 @@ class _CalorieHeroCard extends StatelessWidget {
               '$consumed consumed  •  $remaining remaining',
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: AppColors.textSecondaryDark,
+                color: textSecondary,
                 decoration: TextDecoration.none,
               ),
             ),
@@ -622,6 +630,9 @@ class _MacroRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
     final progress = (current / goal).clamp(0.0, 1.0);
     return Column(
       children: [
@@ -642,7 +653,7 @@ class _MacroRing extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.white,
+                  color: theme.colorScheme.onSurface,
                   decoration: TextDecoration.none,
                 ),
               ),
@@ -655,7 +666,7 @@ class _MacroRing extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: AppColors.textSecondaryDark,
+            color: textSecondary,
             decoration: TextDecoration.none,
           ),
         ),
@@ -723,14 +734,19 @@ class _WaterTrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardTheme.color ?? theme.cardColor;
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
     final filled = ctrl.waterGlasses.value;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
@@ -756,7 +772,7 @@ class _WaterTrackerCard extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.white,
+                    color: theme.colorScheme.onSurface,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -764,7 +780,7 @@ class _WaterTrackerCard extends StatelessWidget {
                   '$filled / ${DietController.waterGoal} glasses',
                   style: GoogleFonts.inter(
                     fontSize: 11,
-                    color: AppColors.textSecondaryDark,
+                    color: textSecondary,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -784,17 +800,17 @@ class _WaterTrackerCard extends StatelessWidget {
                   width: 18,
                   height: 22,
                   decoration: BoxDecoration(
-                    color: isFilled ? _kWaterBlue.withAlpha(30) : AppColors.backgroundDark,
+                    color: isFilled ? _kWaterBlue.withAlpha(30) : theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: isFilled ? _kWaterBlue : AppColors.textSecondaryDark.withAlpha(50),
+                      color: isFilled ? _kWaterBlue : textSecondary.withAlpha(50),
                       width: 1,
                     ),
                   ),
                   child: Icon(
                     CupertinoIcons.drop_fill,
                     size: 10,
-                    color: isFilled ? _kWaterBlue : AppColors.textSecondaryDark.withAlpha(60),
+                    color: isFilled ? _kWaterBlue : textSecondary.withAlpha(60),
                   ),
                 ),
               );
@@ -833,13 +849,17 @@ class _MealSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardTheme.color ?? theme.cardColor;
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
     final meal = ctrl.meals[mealIndex];
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         children: [
@@ -857,7 +877,7 @@ class _MealSectionCard extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.white,
+                          color: theme.colorScheme.onSurface,
                           decoration: TextDecoration.none,
                         ),
                       ),
@@ -896,7 +916,7 @@ class _MealSectionCard extends StatelessWidget {
             }
             return Column(
               children: [
-                const Divider(color: AppColors.cardBorderDark, height: 1),
+                Divider(color: borderColor, height: 1),
                 ...List.generate(meal.items.length, (i) {
                   return _FoodItemTile(
                     item: meal.items[i],
@@ -937,6 +957,10 @@ class _FoodItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return Dismissible(
       key: UniqueKey(),
       direction: DismissDirection.endToStart,
@@ -960,7 +984,7 @@ class _FoodItemTile extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onSurface,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -969,7 +993,7 @@ class _FoodItemTile extends StatelessWidget {
                     item.quantity,
                     style: GoogleFonts.inter(
                       fontSize: 11,
-                      color: AppColors.textSecondaryDark,
+                      color: textSecondary,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -997,7 +1021,7 @@ class _FoodItemTile extends StatelessWidget {
               ' kcal',
               style: GoogleFonts.inter(
                 fontSize: 10,
-                color: AppColors.textSecondaryDark,
+                color: textSecondary,
                 decoration: TextDecoration.none,
               ),
             ),
@@ -1078,13 +1102,20 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardTheme.color ?? theme.cardColor;
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final hintColor = isDark ? const Color(0xFF8888AA) : AppColors.textSecondaryLight;
+
     return Container(
       height: (MediaQuery.of(context).size.height * 0.75 -
               MediaQuery.of(context).viewInsets.bottom)
           .clamp(300.0, double.infinity),
-      decoration: const BoxDecoration(
-        color: AppColors.cardDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -1095,7 +1126,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textSecondaryDark.withAlpha(50),
+                color: textSecondary.withAlpha(50),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1110,7 +1141,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.white,
+                    color: theme.colorScheme.onSurface,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -1118,7 +1149,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () => Navigator.pop(context),
-                  child: const Icon(CupertinoIcons.xmark_circle_fill, color: AppColors.textSecondaryDark, size: 24),
+                  child: Icon(CupertinoIcons.xmark_circle_fill, color: textSecondary, size: 24),
                 ),
               ],
             ),
@@ -1134,19 +1165,19 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
               cursorColor: AppColors.accentOrange,
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
                 decoration: TextDecoration.none,
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF0A0A0F),
+                fillColor: theme.scaffoldBackgroundColor,
                 hintText: 'Search foods...',
                 hintStyle: GoogleFonts.inter(
                   fontSize: 14,
-                  color: const Color(0xFF8888AA),
+                  color: hintColor,
                   decoration: TextDecoration.none,
                 ),
-                prefixIcon: const Icon(CupertinoIcons.search, size: 18, color: Color(0xFF8888AA)),
+                prefixIcon: Icon(CupertinoIcons.search, size: 18, color: hintColor),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1154,7 +1185,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0x15FFFFFF), width: 1),
+                  borderSide: BorderSide(color: isDark ? const Color(0x15FFFFFF) : const Color(0x15000000), width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1182,15 +1213,15 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.cardDark,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.cardBorderDark),
+                      border: Border.all(color: borderColor),
                     ),
                     child: Text(
                       _recentFoods[i],
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: AppColors.textSecondaryDark,
+                        color: textSecondary,
                         decoration: TextDecoration.none,
                       ),
                     ),
@@ -1209,7 +1240,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondaryDark,
+                  color: textSecondary,
                   decoration: TextDecoration.none,
                 ),
               ),
@@ -1225,14 +1256,14 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                       padding: const EdgeInsets.only(top: 40),
                       child: Column(
                         children: [
-                          Icon(CupertinoIcons.search, size: 40, color: AppColors.textSecondaryDark.withAlpha(80)),
+                          Icon(CupertinoIcons.search, size: 40, color: textSecondary.withAlpha(80)),
                           const SizedBox(height: 12),
                           Text(
                             'No results found',
                             style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondaryDark,
+                              color: textSecondary,
                               decoration: TextDecoration.none,
                             ),
                           ),
@@ -1241,7 +1272,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                             'Try a different search term',
                             style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: AppColors.textSecondaryDark.withAlpha(120),
+                              color: textSecondary.withAlpha(120),
                               decoration: TextDecoration.none,
                             ),
                           ),
@@ -1259,9 +1290,9 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundDark,
+                            color: theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.cardBorderDark),
+                            border: Border.all(color: borderColor),
                           ),
                           child: Row(
                             children: [
@@ -1274,7 +1305,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                                       style: GoogleFonts.inter(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
-                                        color: AppColors.white,
+                                        color: theme.colorScheme.onSurface,
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
@@ -1283,7 +1314,7 @@ class _AddFoodBottomSheetState extends State<_AddFoodBottomSheet> {
                                       '${food.quantity}  •  ${food.calories} kcal',
                                       style: GoogleFonts.inter(
                                         fontSize: 11,
-                                        color: AppColors.textSecondaryDark,
+                                        color: textSecondary,
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
@@ -1328,6 +1359,11 @@ class _DailySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardTheme.color ?? theme.cardColor;
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1336,7 +1372,7 @@ class _DailySummary extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.white,
+            color: theme.colorScheme.onSurface,
             decoration: TextDecoration.none,
           ),
         ),
@@ -1400,9 +1436,9 @@ class _DailySummary extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorderDark),
+            border: Border.all(color: borderColor),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1412,7 +1448,7 @@ class _DailySummary extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.white,
+                  color: theme.colorScheme.onSurface,
                   decoration: TextDecoration.none,
                 ),
               ),
@@ -1448,12 +1484,18 @@ class _SummaryStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardTheme.color ?? theme.cardColor;
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.cardDark,
+        color: cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorderDark),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1465,7 +1507,7 @@ class _SummaryStatCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: AppColors.white,
+              color: theme.colorScheme.onSurface,
               decoration: TextDecoration.none,
             ),
           ),
@@ -1473,7 +1515,7 @@ class _SummaryStatCard extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
-              color: AppColors.textSecondaryDark,
+              color: textSecondary,
               decoration: TextDecoration.none,
             ),
           ),
@@ -1526,6 +1568,10 @@ class _MicroRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -1536,7 +1582,7 @@ class _MicroRow extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: AppColors.textSecondaryDark,
+                color: textSecondary,
                 decoration: TextDecoration.none,
               ),
             ),
@@ -1568,7 +1614,7 @@ class _MicroRow extends StatelessWidget {
             '$value / $goal',
             style: GoogleFonts.inter(
               fontSize: 10,
-              color: AppColors.textSecondaryDark,
+              color: textSecondary,
               decoration: TextDecoration.none,
             ),
           ),
@@ -1595,10 +1641,16 @@ class _ScannerOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardTheme.color ?? theme.cardColor;
+    final handleColor = isDark ? const Color(0x20FFFFFF) : const Color(0x20000000);
+    final hintColor = isDark ? const Color(0xFF8888AA) : AppColors.textSecondaryLight;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.cardDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       child: Column(
@@ -1610,7 +1662,7 @@ class _ScannerOptionsSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0x20FFFFFF),
+                color: handleColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1623,10 +1675,10 @@ class _ScannerOptionsSheet extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF1E1230), AppColors.cardDark],
+                colors: [const Color(0xFF1E1230), cardColor],
               ),
               boxShadow: [
                 BoxShadow(
@@ -1653,7 +1705,7 @@ class _ScannerOptionsSheet extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -1662,7 +1714,7 @@ class _ScannerOptionsSheet extends StatelessWidget {
                   'Choose how to track your food',
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: const Color(0xFF8888AA),
+                    color: hintColor,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -1694,8 +1746,8 @@ class _ScannerOptionsSheet extends StatelessWidget {
             icon: CupertinoIcons.barcode_viewfinder,
             title: 'Scan Barcode',
             subtitle: 'Scan product barcode for exact nutrition info',
-            borderColor: const Color(0x10FFFFFF),
-            chevronColor: const Color(0xFF8888AA),
+            borderColor: isDark ? const Color(0x10FFFFFF) : const Color(0x15000000),
+            chevronColor: hintColor,
           ),
           const SizedBox(height: 16),
 
@@ -1706,7 +1758,7 @@ class _ScannerOptionsSheet extends StatelessWidget {
               width: double.infinity,
               height: 52,
               decoration: BoxDecoration(
-                color: const Color(0xFF0A0A0F),
+                color: theme.scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(14),
               ),
               alignment: Alignment.center,
@@ -1776,6 +1828,10 @@ class _ScanOptionCardState extends State<_ScanOptionCard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final hintColor = isDark ? const Color(0xFF8888AA) : AppColors.textSecondaryLight;
+
     return GestureDetector(
       onTapDown: (_) => _pressCtrl.forward(),
       onTapUp: (_) {
@@ -1789,7 +1845,7 @@ class _ScanOptionCardState extends State<_ScanOptionCard>
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A0A0F),
+            color: theme.scaffoldBackgroundColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: widget.borderColor),
           ),
@@ -1817,7 +1873,7 @@ class _ScanOptionCardState extends State<_ScanOptionCard>
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: theme.colorScheme.onSurface,
                         decoration: TextDecoration.none,
                       ),
                     ),
@@ -1826,7 +1882,7 @@ class _ScanOptionCardState extends State<_ScanOptionCard>
                       widget.subtitle,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: const Color(0xFF8888AA),
+                        color: hintColor,
                         decoration: TextDecoration.none,
                       ),
                     ),

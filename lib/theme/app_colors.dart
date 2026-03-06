@@ -11,7 +11,10 @@ abstract final class AppColors {
 
   // ── Cards ────────────────────────────────────────────────────────────
   static const Color cardDark = Color(0xFF1A1A27);
-  static const Color cardLight = Color(0xFFF0F0F8);
+  static const Color cardLight = Color(0xFFFFFFFF);
+
+  // ── Secondary surfaces (light mode) ────────────────────────────────
+  static const Color secondaryLight = Color(0xFFF0F0F8);
 
   // ── Accents ──────────────────────────────────────────────────────────
   static const Color accentOrange = Color(0xFFFF6B35);
@@ -47,5 +50,5 @@ abstract final class AppColors {
 
   // ── Card Borders ─────────────────────────────────────────────────────
   static const Color cardBorderDark = Color(0x0FFFFFFF); // rgba(255,255,255,0.06)
-  static const Color cardBorderLight = Color(0x0A000000); // rgba(0,0,0,0.04)
+  static const Color cardBorderLight = Color(0x1A000000); // rgba(0,0,0,0.10)
 }
