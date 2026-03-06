@@ -5,11 +5,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../controllers/diet_controller.dart';
+import '../../models/diet_log_model.dart';
 import '../../theme/app_colors.dart';
 import 'barcode_scanner_screen.dart';
 import 'ai_food_scanner_screen.dart';
@@ -45,26 +46,7 @@ class FoodItem {
   });
 }
 
-class MealSection {
-  final String name;
-  final String icon;
-  final int goalKcal;
-  final RxList<FoodItem> items;
-  final RxBool expanded;
-
-  MealSection({
-    required this.name,
-    required this.icon,
-    required this.goalKcal,
-    required List<FoodItem> items,
-  })  : items = items.obs,
-        expanded = true.obs;
-
-  int get totalCalories => items.fold(0, (s, i) => s + i.calories);
-  int get totalProtein => items.fold(0, (s, i) => s + i.protein);
-  int get totalCarbs => items.fold(0, (s, i) => s + i.carbs);
-  int get totalFat => items.fold(0, (s, i) => s + i.fat);
-}
+// MealSection is defined in diet_controller.dart
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  SEARCHABLE FOOD DATABASE
@@ -129,111 +111,7 @@ const List<FoodItem> _kFoodDatabase = [
   FoodItem(name: 'Peanut Butter Toast', quantity: 'per 1 slice', calories: 190, protein: 7, carbs: 18, fat: 10),
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  CONTROLLER
-// ═══════════════════════════════════════════════════════════════════════════
-
-class DietController extends GetxController {
-  final selectedDate = DateTime.now().obs;
-  final waterGlasses = 6.obs;
-  static const int waterGoal = 8;
-  static const int calorieGoal = 2200;
-  static const int proteinGoal = 160;
-  static const int carbsGoal = 220;
-  static const int fatGoal = 60;
-
-  late final List<MealSection> meals;
-
-  @override
-  void onInit() {
-    super.onInit();
-    meals = [
-      MealSection(
-        name: 'Breakfast',
-        icon: '🌅',
-        goalKcal: 600,
-        items: [
-          const FoodItem(name: 'Oatmeal with Banana', quantity: '1 cup • 200g', calories: 280, protein: 8, carbs: 48, fat: 6),
-          const FoodItem(name: 'Black Coffee', quantity: '1 cup • 240ml', calories: 2, protein: 0, carbs: 0, fat: 0),
-        ],
-      ),
-      MealSection(
-        name: 'Lunch',
-        icon: '☀️',
-        goalKcal: 700,
-        items: [
-          const FoodItem(name: 'Dal Chawal', quantity: '1 plate • 350g', calories: 420, protein: 16, carbs: 68, fat: 8),
-          const FoodItem(name: 'Curd', quantity: '1 bowl • 100g', calories: 60, protein: 3, carbs: 5, fat: 3),
-        ],
-      ),
-      MealSection(
-        name: 'Dinner',
-        icon: '🌙',
-        goalKcal: 650,
-        items: [
-          const FoodItem(name: 'Grilled Chicken', quantity: '1 serving • 200g', calories: 330, protein: 62, carbs: 0, fat: 8),
-        ],
-      ),
-      MealSection(
-        name: 'Snacks',
-        icon: '🍎',
-        goalKcal: 250,
-        items: [
-          const FoodItem(name: 'Mixed Nuts', quantity: '1 handful • 30g', calories: 173, protein: 5, carbs: 6, fat: 15),
-        ],
-      ),
-    ];
-  }
-
-  int get totalCalories => meals.fold(0, (s, m) => s + m.totalCalories);
-  int get totalProtein => meals.fold(0, (s, m) => s + m.totalProtein);
-  int get totalCarbs => meals.fold(0, (s, m) => s + m.totalCarbs);
-  int get totalFat => meals.fold(0, (s, m) => s + m.totalFat);
-  int get remainingCalories => (calorieGoal - totalCalories).clamp(0, calorieGoal);
-
-  String get dateLabel {
-    final now = DateTime.now();
-    final d = selectedDate.value;
-    if (d.year == now.year && d.month == now.month && d.day == now.day) {
-      return 'Today';
-    }
-    final yesterday = now.subtract(const Duration(days: 1));
-    if (d.year == yesterday.year && d.month == yesterday.month && d.day == yesterday.day) {
-      return 'Yesterday';
-    }
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${d.day} ${months[d.month - 1]}';
-  }
-
-  void previousDay() => selectedDate.value = selectedDate.value.subtract(const Duration(days: 1));
-  void nextDay() => selectedDate.value = selectedDate.value.add(const Duration(days: 1));
-
-  void toggleWaterGlass(int index) {
-    HapticFeedback.lightImpact();
-    if (index < waterGlasses.value) {
-      waterGlasses.value = index;
-    } else {
-      waterGlasses.value = index + 1;
-    }
-  }
-
-  void addWater() {
-    if (waterGlasses.value < waterGoal) {
-      HapticFeedback.lightImpact();
-      waterGlasses.value++;
-    }
-  }
-
-  void addFoodToMeal(int mealIndex, FoodItem food) {
-    HapticFeedback.mediumImpact();
-    meals[mealIndex].items.add(food);
-  }
-
-  void removeFoodFromMeal(int mealIndex, int foodIndex) {
-    HapticFeedback.lightImpact();
-    meals[mealIndex].items.removeAt(foodIndex);
-  }
-}
+// DietController is defined in diet_controller.dart and registered in main.dart
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  DIET SCREEN
@@ -252,7 +130,7 @@ class _DietScreenState extends State<DietScreen> {
   @override
   void initState() {
     super.initState();
-    _ctrl = Get.put(DietController(), permanent: true);
+    _ctrl = Get.find<DietController>();
   }
 
   // ─── Scanner Options ──────────────────────────────────────────────
@@ -280,7 +158,18 @@ class _DietScreenState extends State<DietScreen> {
       CupertinoPageRoute<void>(
         builder: (_) => BarcodeScannerScreen(
           onFoodScanned: (food, mealIndex) {
-            _ctrl.addFoodToMeal(mealIndex, food);
+            final mealName = _ctrl.meals[mealIndex].name;
+            _ctrl.addFoodLog(DietLogModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              date: _ctrl.selectedDate.value,
+              mealType: mealName,
+              foodName: food.name,
+              calories: food.calories,
+              protein: food.protein.toDouble(),
+              carbs: food.carbs.toDouble(),
+              fat: food.fat.toDouble(),
+              quantity: food.quantity,
+            ));
           },
         ),
       ),
@@ -323,7 +212,17 @@ class _DietScreenState extends State<DietScreen> {
     ).then((items) {
       if (items != null && items.isNotEmpty) {
         for (final food in items) {
-          _ctrl.addFoodToMeal(mealIndex, food);
+          _ctrl.addFoodLog(DietLogModel(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            date: _ctrl.selectedDate.value,
+            mealType: mealName,
+            foodName: food.name,
+            calories: food.calories,
+            protein: food.protein.toDouble(),
+            carbs: food.carbs.toDouble(),
+            fat: food.fat.toDouble(),
+            quantity: food.quantity,
+          ));
         }
       }
     });
@@ -337,12 +236,14 @@ class _DietScreenState extends State<DietScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Obx(() {
-        // Touch all reactive values so Obx rebuilds
+        // Touch all reactive values so Obx rebuilds on any data change
         _ctrl.selectedDate.value;
         _ctrl.waterGlasses.value;
-        for (final m in _ctrl.meals) {
-          m.items.length;
-        }
+        _ctrl.todayLogs.length;
+        _ctrl.totalCalories.value;
+        _ctrl.totalProtein.value;
+        _ctrl.totalCarbs.value;
+        _ctrl.totalFat.value;
 
         return CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -419,7 +320,7 @@ class _DietScreenState extends State<DietScreen> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: _ctrl.previousDay,
+                        onTap: () => _ctrl.navigateDate(-1),
                         child: Icon(CupertinoIcons.chevron_left, size: 12, color: textSecondary),
                       ),
                       const SizedBox(width: 4),
@@ -434,7 +335,7 @@ class _DietScreenState extends State<DietScreen> {
                           )),
                       const SizedBox(width: 4),
                       GestureDetector(
-                        onTap: _ctrl.nextDay,
+                        onTap: () => _ctrl.navigateDate(1),
                         child: Icon(CupertinoIcons.chevron_right, size: 12, color: textSecondary),
                       ),
                     ],
@@ -486,9 +387,9 @@ class _CalorieHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final consumed = ctrl.totalCalories;
+    final consumed = ctrl.totalCalories.value;
     final remaining = ctrl.remainingCalories;
-    final progress = (consumed / DietController.calorieGoal).clamp(0.0, 1.0);
+    final progress = (consumed / ctrl.calorieGoal.value).clamp(0.0, 1.0);
     final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Container(
@@ -521,7 +422,7 @@ class _CalorieHeroCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${DietController.calorieGoal} kcal',
+                  '${ctrl.calorieGoal.value} kcal',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -581,22 +482,22 @@ class _CalorieHeroCard extends StatelessWidget {
               children: [
                 _MacroRing(
                   label: 'Protein',
-                  current: ctrl.totalProtein,
-                  goal: DietController.proteinGoal,
+                  current: ctrl.totalProtein.value.toInt(),
+                  goal: ctrl.proteinGoal.value.toInt(),
                   color: _kProteinBlue,
                   unit: 'g',
                 ),
                 _MacroRing(
                   label: 'Carbs',
-                  current: ctrl.totalCarbs,
-                  goal: DietController.carbsGoal,
+                  current: ctrl.totalCarbs.value.toInt(),
+                  goal: ctrl.carbsGoal.value.toInt(),
                   color: _kCarbsGreen,
                   unit: 'g',
                 ),
                 _MacroRing(
                   label: 'Fat',
-                  current: ctrl.totalFat,
-                  goal: DietController.fatGoal,
+                  current: ctrl.totalFat.value.toInt(),
+                  goal: ctrl.fatGoal.value.toInt(),
                   color: _kFatPurple,
                   unit: 'g',
                 ),
@@ -740,6 +641,7 @@ class _WaterTrackerCard extends StatelessWidget {
     final borderColor = isDark ? AppColors.cardBorderDark : AppColors.cardBorderLight;
     final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
     final filled = ctrl.waterGlasses.value;
+    final goal   = ctrl.waterGoal.value;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -777,7 +679,7 @@ class _WaterTrackerCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$filled / ${DietController.waterGoal} glasses',
+                  '$filled / $goal glasses',
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     color: textSecondary,
@@ -790,7 +692,7 @@ class _WaterTrackerCard extends StatelessWidget {
 
           // Glass icons
           Row(
-            children: List.generate(DietController.waterGoal, (i) {
+            children: List.generate(goal, (i) {
               final isFilled = i < filled;
               return GestureDetector(
                 onTap: () => ctrl.toggleWaterGlass(i),
@@ -883,7 +785,7 @@ class _MealSectionCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        '${meal.totalCalories} / ${meal.goalKcal} kcal',
+                        '${ctrl.caloriesForMeal(meal.name)} / ${meal.goalKcal} kcal',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -909,20 +811,39 @@ class _MealSectionCard extends StatelessWidget {
             ),
           ),
 
-          // Expandable items
+          // Expandable items — filter todayLogs by this meal's name
           Obx(() {
-            if (!meal.expanded.value || meal.items.isEmpty) {
+            final logs = ctrl.logsForMeal(meal.name);
+            if (!meal.expanded.value || logs.isEmpty) {
+              if (meal.expanded.value && logs.isEmpty) {
+                return Column(
+                  children: [
+                    Divider(color: borderColor, height: 1),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Text(
+                        'No foods added yet',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
               return const SizedBox.shrink();
             }
             return Column(
               children: [
                 Divider(color: borderColor, height: 1),
-                ...List.generate(meal.items.length, (i) {
-                  return _FoodItemTile(
-                    item: meal.items[i],
-                    onDelete: () => ctrl.removeFoodFromMeal(mealIndex, i),
-                  );
-                }),
+                ...logs.map((log) => _FoodItemTile(
+                      item: log,
+                      onDelete: () => ctrl.deleteFoodLog(log.id),
+                    )),
               ],
             );
           }),
@@ -932,13 +853,26 @@ class _MealSectionCard extends StatelessWidget {
   }
 
   void _showAddFoodSheet(BuildContext context) {
+    final mealName = ctrl.meals[mealIndex].name;
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Material(
         color: Colors.transparent,
         child: _AddFoodBottomSheet(
-          mealName: ctrl.meals[mealIndex].name,
-          onAdd: (food) => ctrl.addFoodToMeal(mealIndex, food),
+          mealName: mealName,
+          onAdd: (food) {
+            ctrl.addFoodLog(DietLogModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              date: ctrl.selectedDate.value,
+              mealType: mealName,
+              foodName: food.name,
+              calories: food.calories,
+              protein: food.protein.toDouble(),
+              carbs: food.carbs.toDouble(),
+              fat: food.fat.toDouble(),
+              quantity: food.quantity,
+            ));
+          },
         ),
       ),
     );
@@ -950,7 +884,7 @@ class _MealSectionCard extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _FoodItemTile extends StatelessWidget {
-  final FoodItem item;
+  final DietLogModel item;
   final VoidCallback onDelete;
 
   const _FoodItemTile({required this.item, required this.onDelete});
@@ -980,7 +914,7 @@ class _FoodItemTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.name,
+                    item.foodName,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -1001,11 +935,11 @@ class _FoodItemTile extends StatelessWidget {
               ),
             ),
             // Macro pills
-            _MacroPill('P: ${item.protein}g', _kProteinBlue),
+            _MacroPill('P: ${item.protein.toInt()}g', _kProteinBlue),
             const SizedBox(width: 4),
-            _MacroPill('C: ${item.carbs}g', _kCarbsGreen),
+            _MacroPill('C: ${item.carbs.toInt()}g', _kCarbsGreen),
             const SizedBox(width: 4),
-            _MacroPill('F: ${item.fat}g', _kFatPurple),
+            _MacroPill('F: ${item.fat.toInt()}g', _kFatPurple),
             const SizedBox(width: 10),
             // Calories
             Text(
@@ -1385,9 +1319,9 @@ class _DailySummary extends StatelessWidget {
               child: _SummaryStatCard(
                 icon: CupertinoIcons.flame_fill,
                 iconColor: AppColors.accentOrange,
-                value: '${ctrl.totalCalories}',
+                value: '${ctrl.totalCalories.value}',
                 label: 'Calories',
-                progress: (ctrl.totalCalories / DietController.calorieGoal).clamp(0.0, 1.0),
+                progress: (ctrl.totalCalories.value / ctrl.calorieGoal.value).clamp(0.0, 1.0),
                 barColor: AppColors.accentOrange,
               ),
             ),
@@ -1396,9 +1330,9 @@ class _DailySummary extends StatelessWidget {
               child: _SummaryStatCard(
                 icon: CupertinoIcons.bolt_fill,
                 iconColor: _kProteinBlue,
-                value: '${ctrl.totalProtein}g',
+                value: '${ctrl.totalProtein.value.toInt()}g',
                 label: 'Protein',
-                progress: (ctrl.totalProtein / DietController.proteinGoal).clamp(0.0, 1.0),
+                progress: (ctrl.totalProtein.value / ctrl.proteinGoal.value).clamp(0.0, 1.0),
                 barColor: _kProteinBlue,
               ),
             ),
@@ -1411,9 +1345,9 @@ class _DailySummary extends StatelessWidget {
               child: _SummaryStatCard(
                 icon: CupertinoIcons.leaf_arrow_circlepath,
                 iconColor: _kCarbsGreen,
-                value: '${ctrl.totalCarbs}g',
+                value: '${ctrl.totalCarbs.value.toInt()}g',
                 label: 'Net Carbs',
-                progress: (ctrl.totalCarbs / DietController.carbsGoal).clamp(0.0, 1.0),
+                progress: (ctrl.totalCarbs.value / ctrl.carbsGoal.value).clamp(0.0, 1.0),
                 barColor: _kCarbsGreen,
               ),
             ),
@@ -1422,9 +1356,9 @@ class _DailySummary extends StatelessWidget {
               child: _SummaryStatCard(
                 icon: CupertinoIcons.drop_fill,
                 iconColor: _kFatPurple,
-                value: '${ctrl.totalFat}g',
+                value: '${ctrl.totalFat.value.toInt()}g',
                 label: 'Total Fat',
-                progress: (ctrl.totalFat / DietController.fatGoal).clamp(0.0, 1.0),
+                progress: (ctrl.totalFat.value / ctrl.fatGoal.value).clamp(0.0, 1.0),
                 barColor: _kFatPurple,
               ),
             ),

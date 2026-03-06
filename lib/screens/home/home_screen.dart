@@ -6,9 +6,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../controllers/diet_controller.dart' show DietController;
 import '../../controllers/user_controller.dart';
 import '../../controllers/workout_controller.dart' show WorkoutController;
-import '../../services/hive_service.dart';
 import '../../theme/app_colors.dart';
 import '../diet/diet_screen.dart';
 import '../profile/profile_screen.dart';
@@ -299,7 +299,7 @@ class _DailyScoreCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final workoutCtrl = Get.find<WorkoutController>();
     final userCtrl = Get.find<UserController>();
-    final hive = Get.find<HiveService>();
+    final dietCtrl = Get.find<DietController>();
 
     return Obx(() {
       final calories = workoutCtrl.todayCaloriesBurned.value;
@@ -308,15 +308,8 @@ class _DailyScoreCard extends StatelessWidget {
       final stepsGoal = userCtrl.settings.value.dailyStepsGoal <= 0
           ? 10000
           : userCtrl.settings.value.dailyStepsGoal;
-      final waterGoal = userCtrl.settings.value.dailyWaterGoal <= 0
-          ? 8
-          : userCtrl.settings.value.dailyWaterGoal;
-      int waterToday = 0;
-      try {
-        waterToday = hive.getWaterLogByDate(DateTime.now())?.glassesCount ?? 0;
-      } catch (_) {
-        waterToday = 0;
-      }
+      final waterGoal = dietCtrl.waterGoal.value;
+      final waterToday = dietCtrl.waterGlasses.value;
       final stepScore = (steps / stepsGoal).clamp(0.0, 1.0) * 40;
       final workoutScore = workoutCtrl.todaysWorkout.value != null ? 40.0 : 0.0;
       final waterScore = (waterToday / waterGoal).clamp(0.0, 1.0) * 20;
@@ -692,16 +685,23 @@ class _QuickStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _QuickStatCard(
-            icon: CupertinoIcons.drop_fill,
-            value: '2.4L',
-            label: 'Water',
-            accentColor: const Color(0xFF4DA6FF),
+    final dietCtrl = Get.find<DietController>();
+    return Obx(() {
+      // Convert glasses to litres (1 glass ≈ 250 ml)
+      final litres = (dietCtrl.waterGlasses.value * 0.25);
+      final waterLabel = litres == 0
+          ? '0.0L'
+          : '${litres.toStringAsFixed(litres >= 1 ? 1 : 1)}L';
+      return Row(
+        children: [
+          Expanded(
+            child: _QuickStatCard(
+              icon: CupertinoIcons.drop_fill,
+              value: waterLabel,
+              label: 'Water',
+              accentColor: const Color(0xFF4DA6FF),
+            ),
           ),
-        ),
         const SizedBox(width: 12),
         Expanded(
           child: _QuickStatCard(
@@ -711,17 +711,18 @@ class _QuickStatsRow extends StatelessWidget {
             accentColor: const Color(0xFFAA7BF7),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _QuickStatCard(
-            icon: CupertinoIcons.heart_fill,
-            value: '22.1',
-            label: 'BMI',
-            accentColor: AppColors.success,
+          const SizedBox(width: 12),
+          Expanded(
+            child: _QuickStatCard(
+              icon: CupertinoIcons.heart_fill,
+              value: '22.1',
+              label: 'BMI',
+              accentColor: AppColors.success,
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
 

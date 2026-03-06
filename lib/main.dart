@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'controllers/diet_controller.dart';
 import 'controllers/theme_controller.dart';
 import 'controllers/user_controller.dart';
 import 'controllers/workout_controller.dart';
@@ -98,6 +99,7 @@ Future<void> main() async {
 
   Get.put(UserController());
   Get.put(WorkoutController());
+  Get.put(DietController());
   Get.put(ThemeController(initialThemeMode));
 
   runApp(FitForgeApp(initialThemeMode: initialThemeMode));
