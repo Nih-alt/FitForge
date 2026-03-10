@@ -424,6 +424,7 @@ class WorkoutScreen extends StatelessWidget {
 void _showFilterSheet(BuildContext context, _WorkoutBrowseController c) {
   showCupertinoModalPopup(
     context: context,
+    barrierDismissible: true,
     builder: (_) => _FilterBottomSheet(controller: c),
   );
 }

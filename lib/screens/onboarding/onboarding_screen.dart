@@ -544,6 +544,8 @@ class _DobPickerField extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
       builder: (ctx) {
         final theme = Theme.of(ctx);
         final isDark = theme.brightness == Brightness.dark;

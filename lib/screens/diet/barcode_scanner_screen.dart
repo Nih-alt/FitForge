@@ -70,6 +70,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
     showCupertinoModalPopup<void>(
       context: context,
+      barrierDismissible: true,
       builder: (_) => _ProductResultSheet(
         product: product,
         onMealSelected: (mealIndex) {

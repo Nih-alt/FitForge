@@ -330,7 +330,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => _UpdateMeasurementsSheet(
+      barrierDismissible: true,
+      builder:(_) => _UpdateMeasurementsSheet(
         controllers: controllers,
         onSave: (newValues) {
           setState(() {
@@ -365,7 +366,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => Container(
+      barrierDismissible: true,
+      builder:(_) => Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: theme.cardTheme.color,
@@ -541,7 +543,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (ctx) => Padding(
+      barrierDismissible: true,
+      builder:(ctx) => Padding(
         padding: EdgeInsets.only(
             bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
@@ -731,7 +734,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => CupertinoActionSheet(
+      barrierDismissible: true,
+      builder:(_) => CupertinoActionSheet(
         title: Text('Add Progress Photo',
             style: GoogleFonts.poppins(
                 fontSize: 16,
@@ -787,7 +791,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (ctx) => Padding(
+      barrierDismissible: true,
+      builder:(ctx) => Padding(
         padding:
             EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
@@ -955,7 +960,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => Container(
+      barrierDismissible: true,
+      builder:(_) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
@@ -1057,7 +1063,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => Scaffold(
+      barrierDismissible: true,
+      builder:(_) => Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
@@ -1112,7 +1119,8 @@ class _ProgressScreenState extends State<ProgressScreen>
 
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => CupertinoActionSheet(
+      barrierDismissible: true,
+      builder:(_) => CupertinoActionSheet(
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
@@ -1593,6 +1601,8 @@ class _ActivityCalendar extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
       builder: (_) => _DayDetailSheet(date: day, log: log),
     );
   }

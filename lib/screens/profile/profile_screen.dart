@@ -373,6 +373,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onTap: () {
             showCupertinoModalPopup<void>(
               context: context,
+              barrierDismissible: true,
               builder: (_) => CupertinoActionSheet(
                 title: Text(
                   'Select Fitness Goal',
@@ -433,17 +434,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     int selected = _userCtrl.settings.value.weeklyWorkoutGoal;
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) {
+      barrierDismissible: true,
+      builder:(_) {
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
         return Container(
-        height: 280,
+        height: 310,
         decoration: BoxDecoration(
           color: theme.cardTheme.color,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
+            const SizedBox(height: 12),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
@@ -614,6 +627,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onTap: () {
             showCupertinoModalPopup<void>(
               context: context,
+              barrierDismissible: true,
               builder: (_) => CupertinoActionSheet(
                 title: Text(
                   'Select Unit System',
@@ -667,7 +681,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = theme.brightness == Brightness.dark;
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) => Container(
+      barrierDismissible: true,
+      builder:(_) => Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: theme.cardTheme.color,
@@ -793,16 +808,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ════════════════════════════════════════════════════════════════════════════
 
   void _showPrivacyPolicy() {
-    showCupertinoModalPopup<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (_) => _LegalSheet(
-        title: 'Privacy Policy',
-        paragraphs: const [
-          'Data Collection\n\nFitForge collects information you provide directly, such as your name, age, weight, height, fitness goals, and workout logs. We also collect usage data, device information, and performance metrics to improve the app experience. All data collection is transparent and limited to what is necessary to provide our services.',
-          'How We Use Your Data\n\nYour data is used solely to power FitForge features — personalised workout recommendations, progress tracking, AI coaching, and dietary guidance. We do not sell, rent, or share your personal information with third-party advertisers. Aggregated, anonymised data may be used for product improvement and research.',
-          'Data Storage & Security\n\nYour data is stored locally on your device and, where applicable, in encrypted cloud storage. We apply industry-standard security measures including AES-256 encryption at rest and TLS 1.3 in transit. You can delete your account and all associated data at any time from the app settings.',
-          'Your Rights\n\nYou have the right to access, correct, export, or delete any personal data we hold about you. To exercise these rights, use the Data & Storage section in this screen or contact us at privacy@fitforge.app. We will respond to all requests within 30 days in accordance with applicable data protection laws.',
-        ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scrollController) => _LegalSheet(
+          title: 'Privacy Policy',
+          scrollController: scrollController,
+          paragraphs: const [
+            'Data Collection\n\nFitForge collects information you provide directly, such as your name, age, weight, height, fitness goals, and workout logs. We also collect usage data, device information, and performance metrics to improve the app experience. All data collection is transparent and limited to what is necessary to provide our services.',
+            'How We Use Your Data\n\nYour data is used solely to power FitForge features — personalised workout recommendations, progress tracking, AI coaching, and dietary guidance. We do not sell, rent, or share your personal information with third-party advertisers. Aggregated, anonymised data may be used for product improvement and research.',
+            'Data Storage & Security\n\nYour data is stored locally on your device and, where applicable, in encrypted cloud storage. We apply industry-standard security measures including AES-256 encryption at rest and TLS 1.3 in transit. You can delete your account and all associated data at any time from the app settings.',
+            'Your Rights\n\nYou have the right to access, correct, export, or delete any personal data we hold about you. To exercise these rights, use the Data & Storage section in this screen or contact us at privacy@fitforge.app. We will respond to all requests within 30 days in accordance with applicable data protection laws.',
+          ],
+        ),
       ),
     );
   }
@@ -812,16 +838,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ════════════════════════════════════════════════════════════════════════════
 
   void _showTermsOfService() {
-    showCupertinoModalPopup<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (_) => _LegalSheet(
-        title: 'Terms of Service',
-        paragraphs: const [
-          'Acceptance of Terms\n\nBy downloading or using FitForge, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the app. We reserve the right to update these terms at any time; continued use of the app constitutes acceptance of the revised terms.',
-          'Usage Rules\n\nFitForge is intended for personal, non-commercial use only. You agree not to reverse-engineer, modify, distribute, or exploit any part of the app. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.',
-          'Limitations & Disclaimers\n\nFitForge provides general fitness and nutrition guidance for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before starting any new exercise or diet programme. Results may vary and are not guaranteed.',
-          'Liability\n\nTo the maximum extent permitted by law, FitForge and its creators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app. Our total liability for any claim related to the app shall not exceed the amount you paid for FitForge Pro in the 12 months preceding the claim.',
-        ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scrollController) => _LegalSheet(
+          title: 'Terms of Service',
+          scrollController: scrollController,
+          paragraphs: const [
+            'Acceptance of Terms\n\nBy downloading or using FitForge, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the app. We reserve the right to update these terms at any time; continued use of the app constitutes acceptance of the revised terms.',
+            'Usage Rules\n\nFitForge is intended for personal, non-commercial use only. You agree not to reverse-engineer, modify, distribute, or exploit any part of the app. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.',
+            'Limitations & Disclaimers\n\nFitForge provides general fitness and nutrition guidance for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before starting any new exercise or diet programme. Results may vary and are not guaranteed.',
+            'Liability\n\nTo the maximum extent permitted by law, FitForge and its creators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app. Our total liability for any claim related to the app shall not exceed the amount you paid for FitForge Pro in the 12 months preceding the claim.',
+          ],
+        ),
       ),
     );
   }
@@ -831,9 +868,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ════════════════════════════════════════════════════════════════════════════
 
   void _showDataAndStorage() {
-    showCupertinoModalPopup<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => _DataStorageSheet(parentContext: context),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.3,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scrollController) => _DataStorageSheet(
+          parentContext: context,
+          scrollController: scrollController,
+        ),
+      ),
     );
   }
 
@@ -1003,31 +1053,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final weightCtrl = TextEditingController(text: _weight.toStringAsFixed(1));
     final heightCtrl = TextEditingController(text: _height.toStringAsFixed(0));
 
-    showCupertinoModalPopup<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.3,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (ctx, scrollController) => Container(
           decoration: BoxDecoration(
             color: theme.cardTheme.color,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          child: SafeArea(
-            top: false,
-            child: SingleChildScrollView(
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  20, 12, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Handle
-                  Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
-                      borderRadius: BorderRadius.circular(2),
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(60),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -1126,7 +1184,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _pickAvatar() async {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) => CupertinoActionSheet(
+      barrierDismissible: true,
+      builder:(_) => CupertinoActionSheet(
         title: Text(
           'Profile Photo',
           style: GoogleFonts.poppins(
@@ -1486,10 +1545,15 @@ class _SheetField extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════════════════════
 
 class _LegalSheet extends StatelessWidget {
-  const _LegalSheet({required this.title, required this.paragraphs});
+  const _LegalSheet({
+    required this.title,
+    required this.paragraphs,
+    this.scrollController,
+  });
 
   final String title;
   final List<String> paragraphs;
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -1504,7 +1568,6 @@ class _LegalSheet extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             // Drag handle
             const SizedBox(height: 12),
@@ -1553,12 +1616,10 @@ class _LegalSheet extends StatelessWidget {
               ),
             ),
 
-            // Scrollable body — max 60% screen height
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
-              ),
+            // Scrollable body
+            Expanded(
               child: SingleChildScrollView(
+                controller: scrollController,
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                 child: Column(
@@ -1593,9 +1654,10 @@ class _LegalSheet extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════════════════════
 
 class _DataStorageSheet extends StatelessWidget {
-  const _DataStorageSheet({required this.parentContext});
+  const _DataStorageSheet({required this.parentContext, this.scrollController});
 
   final BuildContext parentContext;
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -1610,6 +1672,7 @@ class _DataStorageSheet extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
+          controller: scrollController,
           physics: const BouncingScrollPhysics(),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),

@@ -139,6 +139,8 @@ class _DietScreenState extends State<DietScreen> {
       context: ctx,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
       builder: (_) => _ScannerOptionsSheet(
         onAiScan: () {
           Navigator.pop(ctx);
@@ -181,6 +183,7 @@ class _DietScreenState extends State<DietScreen> {
     final mealIcons = ['🌅', '☀️', '🌙', '🍎'];
     showCupertinoModalPopup<void>(
       context: ctx,
+      barrierDismissible: true,
       builder: (_) => CupertinoActionSheet(
         title: const Text('Add to which meal?'),
         actions: List.generate(mealNames.length, (i) {
@@ -856,6 +859,7 @@ class _MealSectionCard extends StatelessWidget {
     final mealName = ctrl.meals[mealIndex].name;
     showCupertinoModalPopup(
       context: context,
+      barrierDismissible: true,
       builder: (_) => Material(
         color: Colors.transparent,
         child: _AddFoodBottomSheet(
