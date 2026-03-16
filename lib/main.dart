@@ -25,20 +25,16 @@ import 'services/hive_service.dart';
 import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 
-// ── Firebase initialization ────────────────────────────────────────────
-// Uncomment once google-services.json / GoogleService-Info.plist are added:
-//
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
-// ───────────────────────────────────────────────────────────────────────
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ── Firebase ─────────────────────────────────────────────────────────
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // ── Hive (local storage) ─────────────────────────────────────────────
   await Hive.initFlutter();
