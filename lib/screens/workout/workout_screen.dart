@@ -597,6 +597,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppColors.accentOrange),
                         ),
@@ -606,7 +607,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                             style: GoogleFonts.poppins(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.white,
+                              color: theme.textTheme.bodyLarge?.color ?? Colors.black,
                             ),
                           ),
                         ),
