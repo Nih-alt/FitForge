@@ -151,9 +151,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
                 const SizedBox(height: 32),
 
-                // ── "FitForge" text ──────────────────────────────────────
+                // ── "Elevate" text ───────────────────────────────────────
                 Text(
-                  'FitForge',
+                  'Elevate',
                   style: GoogleFonts.poppins(
                     fontSize: 38,
                     fontWeight: FontWeight.w700,
@@ -175,7 +175,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
                 // ── Tagline ──────────────────────────────────────────────
                 Text(
-                  'FORGE YOUR BEST SELF',
+                  'YOUR AI FITNESS COMPANION',
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,

@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Generates FitForge app icons matching the onboarding orange gradient circle
+/// Generates Elevate app icons matching the onboarding orange gradient circle
 /// with dumbbell. Run via: flutter test tool/generate_icon.dart
 void main() {
   test('generate app icons', () async {

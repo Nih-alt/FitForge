@@ -1,4 +1,4 @@
-// FitForge Diet & Nutrition Screen — Premium nutrition tracking UI.
+// Elevate Diet & Nutrition Screen — Premium nutrition tracking UI.
 // Cupertino-first design with theme-aware colors, gradient accents, animated rings.
 
 import 'dart:math' as math;

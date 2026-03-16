@@ -187,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // App version
                   Center(
                     child: Text(
-                      'FitForge v1.0.0',
+                      'Elevate v1.0.0',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight).withAlpha(120),
@@ -855,7 +855,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         _SettingsRow(
           icon: CupertinoIcons.info_circle_fill,
-          label: 'About FitForge',
+          label: 'About Elevate',
           onTap: () => _showAbout(),
         ),
       ],
@@ -903,7 +903,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'FitForge',
+                'Elevate',
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -920,7 +920,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Your premium fitness companion.\nForge your best self, one rep at a time.',
+                'Your AI-powered fitness companion.\nElevate your fitness, one rep at a time.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 14,
@@ -1009,10 +1009,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: 'Privacy Policy',
           scrollController: scrollController,
           paragraphs: const [
-            'Data Collection\n\nFitForge collects information you provide directly, such as your name, age, weight, height, fitness goals, and workout logs. We also collect usage data, device information, and performance metrics to improve the app experience. All data collection is transparent and limited to what is necessary to provide our services.',
-            'How We Use Your Data\n\nYour data is used solely to power FitForge features — personalised workout recommendations, progress tracking, AI coaching, and dietary guidance. We do not sell, rent, or share your personal information with third-party advertisers. Aggregated, anonymised data may be used for product improvement and research.',
+            'Data Collection\n\nElevate collects information you provide directly, such as your name, age, weight, height, fitness goals, and workout logs. We also collect usage data, device information, and performance metrics to improve the app experience. All data collection is transparent and limited to what is necessary to provide our services.',
+            'How We Use Your Data\n\nYour data is used solely to power Elevate features — personalised workout recommendations, progress tracking, AI coaching, and dietary guidance. We do not sell, rent, or share your personal information with third-party advertisers. Aggregated, anonymised data may be used for product improvement and research.',
             'Data Storage & Security\n\nYour data is stored locally on your device and, where applicable, in encrypted cloud storage. We apply industry-standard security measures including AES-256 encryption at rest and TLS 1.3 in transit. You can delete your account and all associated data at any time from the app settings.',
-            'Your Rights\n\nYou have the right to access, correct, export, or delete any personal data we hold about you. To exercise these rights, use the Data & Storage section in this screen or contact us at privacy@fitforge.app. We will respond to all requests within 30 days in accordance with applicable data protection laws.',
+            'Your Rights\n\nYou have the right to access, correct, export, or delete any personal data we hold about you. To exercise these rights, use the Data & Storage section in this screen or contact us at privacy@elevateai.fitness. We will respond to all requests within 30 days in accordance with applicable data protection laws.',
           ],
         ),
       ),
@@ -1039,10 +1039,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: 'Terms of Service',
           scrollController: scrollController,
           paragraphs: const [
-            'Acceptance of Terms\n\nBy downloading or using FitForge, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the app. We reserve the right to update these terms at any time; continued use of the app constitutes acceptance of the revised terms.',
-            'Usage Rules\n\nFitForge is intended for personal, non-commercial use only. You agree not to reverse-engineer, modify, distribute, or exploit any part of the app. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.',
-            'Limitations & Disclaimers\n\nFitForge provides general fitness and nutrition guidance for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before starting any new exercise or diet programme. Results may vary and are not guaranteed.',
-            'Liability\n\nTo the maximum extent permitted by law, FitForge and its creators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app. Our total liability for any claim related to the app shall not exceed the amount you paid for FitForge Pro in the 12 months preceding the claim.',
+            'Acceptance of Terms\n\nBy downloading or using Elevate, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the app. We reserve the right to update these terms at any time; continued use of the app constitutes acceptance of the revised terms.',
+            'Usage Rules\n\nElevate is intended for personal, non-commercial use only. You agree not to reverse-engineer, modify, distribute, or exploit any part of the app. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.',
+            'Limitations & Disclaimers\n\nElevate provides general fitness and nutrition guidance for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before starting any new exercise or diet programme. Results may vary and are not guaranteed.',
+            'Liability\n\nTo the maximum extent permitted by law, Elevate and its creators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app. Our total liability for any claim related to the app shall not exceed the amount you paid for Elevate Pro in the 12 months preceding the claim.',
           ],
         ),
       ),
@@ -1104,7 +1104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                'FitForge Pro',
+                'Elevate Pro',
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -1155,7 +1155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (_) => CupertinoAlertDialog(
         title: const Text('Coming Soon! 🚀'),
         content: const Text(
-          "FitForge Pro is currently in development. We'll notify you as soon as it's available!",
+          "Elevate Pro is currently in development. We'll notify you as soon as it's available!",
         ),
         actions: [
           CupertinoDialogAction(

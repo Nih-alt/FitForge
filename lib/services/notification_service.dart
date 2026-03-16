@@ -23,8 +23,8 @@ class NotificationService extends GetxService {
   // Water reminders: IDs 5–12 (one per 2-hour block: 8AM→10PM)
   static const int kWeeklyProgress    = 13;
 
-  static const _kChannelId   = 'fitforge_channel';
-  static const _kChannelName = 'FitForge Notifications';
+  static const _kChannelId   = 'elevate_channel';
+  static const _kChannelName = 'Elevate Notifications';
 
   // ── Initialization ────────────────────────────────────────────────────────
   Future<NotificationService> init() async {
@@ -101,7 +101,7 @@ class NotificationService extends GetxService {
       _plugin.zonedSchedule(
         kWorkoutReminder,
         '💪 Time to Workout!',
-        "Your daily workout is waiting. Let's forge ahead!",
+        "Your daily workout is waiting. Let's elevate!",
         _nextTime(hour, minute),
         _kDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -171,7 +171,7 @@ class NotificationService extends GetxService {
   Future<void> scheduleWeeklyProgress() => _plugin.zonedSchedule(
         kWeeklyProgress,
         '📊 Weekly Progress Report',
-        'Check out how you did this week. Keep forging ahead!',
+        'Check out how you did this week. Keep elevating!',
         _nextSunday(9, 0),
         _kDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

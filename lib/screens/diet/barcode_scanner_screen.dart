@@ -1,4 +1,4 @@
-// FitForge Barcode Scanner — Scans product barcodes and shows nutrition info.
+// Elevate Barcode Scanner — Scans product barcodes and shows nutrition info.
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

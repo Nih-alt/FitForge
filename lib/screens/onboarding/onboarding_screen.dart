@@ -97,7 +97,7 @@ class _TopBar extends StatelessWidget {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  BOTTOM BUTTON — Continue / Let's Forge!
+//  BOTTOM BUTTON — Continue / Let's Elevate!
 // ════════════════════════════════════════════════════════════════════════════
 
 class _BottomButton extends StatelessWidget {
@@ -115,7 +115,7 @@ class _BottomButton extends StatelessWidget {
         return GradientButton(
           onPressed: controller.nextPage,
           child: Text(
-            isLast ? "Let's Forge!" : 'Continue',
+            isLast ? "Let's Elevate!" : 'Continue',
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -199,7 +199,7 @@ class _WelcomePage extends StatelessWidget {
           const SizedBox(height: 48),
 
           Text(
-            'Welcome to\nFitForge',
+            'Welcome to\nElevate',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 36,

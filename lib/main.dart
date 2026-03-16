@@ -1,4 +1,4 @@
-// FitForge UI Philosophy: Cupertino-first for premium iOS-like feel.
+// Elevate UI Philosophy: Cupertino-first for premium iOS-like feel.
 // Prefer CupertinoSwitch, CupertinoAlertDialog, CupertinoActivityIndicator,
 // CupertinoDatePicker, and CupertinoPageRoute over their Material equivalents.
 
@@ -111,11 +111,11 @@ Future<void> main() async {
     Get.find<UserController>().settings.value,
   );
 
-  runApp(FitForgeApp(initialThemeMode: initialThemeMode));
+  runApp(ElevateApp(initialThemeMode: initialThemeMode));
 }
 
-class FitForgeApp extends StatelessWidget {
-  const FitForgeApp({super.key, required this.initialThemeMode});
+class ElevateApp extends StatelessWidget {
+  const ElevateApp({super.key, required this.initialThemeMode});
 
   final ThemeMode initialThemeMode;
 
@@ -124,7 +124,7 @@ class FitForgeApp extends StatelessWidget {
     final themeCtrl = ThemeController.to;
 
     return Obx(() => GetMaterialApp(
-          title: 'FitForge',
+          title: 'Elevate',
           debugShowCheckedModeBanner: false,
 
           // ── Theme ──────────────────────────────────────────────────────

@@ -432,7 +432,7 @@ abstract final class AppTheme {
   // ══════════════════════════════════════════════════════════════════════
 }
 
-/// Signature gradient button used throughout FitForge for primary CTAs.
+/// Signature gradient button used throughout Elevate for primary CTAs.
 class GradientButton extends StatelessWidget {
   const GradientButton({
     super.key,

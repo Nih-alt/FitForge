@@ -1,4 +1,4 @@
-package com.nihaldevstudio.fitforge
+package com.elevateai.fitness
 
 import io.flutter.embedding.android.FlutterActivity
 

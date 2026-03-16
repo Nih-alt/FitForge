@@ -1,4 +1,4 @@
-/// API key constants for FitForge.
+/// API key constants for Elevate.
 ///
 /// Get free API key from: https://aistudio.google.com/app/apikey
 abstract final class ApiKeys {

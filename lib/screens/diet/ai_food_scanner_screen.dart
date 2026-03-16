@@ -1,4 +1,4 @@
-// FitForge AI Food Scanner — Uses Gemini Vision to recognize food and estimate nutrition.
+// Elevate AI Food Scanner — Uses Gemini Vision to recognize food and estimate nutrition.
 
 import 'dart:convert';
 import 'dart:typed_data';
