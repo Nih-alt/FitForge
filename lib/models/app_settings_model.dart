@@ -40,6 +40,12 @@ class AppSettingsModel extends HiveObject {
   @HiveField(11)
   int dailyStepsGoal;
 
+  @HiveField(12)
+  int workoutReminderHour;
+
+  @HiveField(13)
+  int workoutReminderMinute;
+
   AppSettingsModel({
     this.themeMode = 'system',
     this.weightUnit = 'kg',
@@ -53,5 +59,7 @@ class AppSettingsModel extends HiveObject {
     this.dailyCalorieGoal = 2000,
     this.dailyWaterGoal = 8,
     this.dailyStepsGoal = 10000,
+    this.workoutReminderHour = 8,
+    this.workoutReminderMinute = 0,
   });
 }

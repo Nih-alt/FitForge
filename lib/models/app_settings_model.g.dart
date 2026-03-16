@@ -29,13 +29,15 @@ class AppSettingsModelAdapter extends TypeAdapter<AppSettingsModel> {
       dailyCalorieGoal: fields[9] as int,
       dailyWaterGoal: fields[10] as int,
       dailyStepsGoal: fields[11] as int,
+      workoutReminderHour: fields[12] as int? ?? 8,
+      workoutReminderMinute: fields[13] as int? ?? 0,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettingsModel obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.themeMode)
       ..writeByte(1)
@@ -59,7 +61,11 @@ class AppSettingsModelAdapter extends TypeAdapter<AppSettingsModel> {
       ..writeByte(10)
       ..write(obj.dailyWaterGoal)
       ..writeByte(11)
-      ..write(obj.dailyStepsGoal);
+      ..write(obj.dailyStepsGoal)
+      ..writeByte(12)
+      ..write(obj.workoutReminderHour)
+      ..writeByte(13)
+      ..write(obj.workoutReminderMinute);
   }
 
   @override

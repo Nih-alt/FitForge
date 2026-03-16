@@ -22,6 +22,7 @@ import 'models/weight_log_model.dart';
 import 'models/workout_log_model.dart';
 import 'screens/splash/splash_screen.dart';
 import 'services/hive_service.dart';
+import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 
 // ── Firebase initialization ────────────────────────────────────────────
@@ -101,6 +102,14 @@ Future<void> main() async {
   Get.put(WorkoutController());
   Get.put(DietController());
   Get.put(ThemeController(initialThemeMode));
+
+  // ── Notifications ─────────────────────────────────────────────────────────
+  final notificationSvc = await NotificationService().init();
+  Get.put(notificationSvc);
+  // Reschedule all notifications based on saved settings
+  await notificationSvc.rescheduleAllNotifications(
+    Get.find<UserController>().settings.value,
+  );
 
   runApp(FitForgeApp(initialThemeMode: initialThemeMode));
 }

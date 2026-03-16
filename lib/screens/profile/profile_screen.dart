@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../controllers/theme_controller.dart';
 import '../../controllers/user_controller.dart';
+import '../../services/notification_service.dart';
 import '../../theme/app_colors.dart';
 import '../onboarding/onboarding_screen.dart';
 
@@ -42,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool get _workoutReminders => _userCtrl.settings.value.workoutReminderOn;
   bool get _progressUpdates => _userCtrl.settings.value.progressUpdateOn;
   bool get _dietReminders => _userCtrl.settings.value.mealReminderOn;
+  bool get _waterReminders => _userCtrl.settings.value.waterReminderOn;
   String get _units => _userCtrl.settings.value.weightUnit == 'kg' ? 'Metric' : 'Imperial';
 
   @override
@@ -578,28 +580,212 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildNotificationsCard() {
     return _SettingsCard(
       children: [
-        _SwitchRow(
-          icon: CupertinoIcons.bell_fill,
-          iconColor: AppColors.accentOrange,
-          label: 'Workout Reminders',
-          value: _workoutReminders,
-          onChanged: (v) => _userCtrl.updateSettings(workoutReminderOn: v),
-        ),
+        _buildWorkoutReminderRow(),
         _SwitchRow(
           icon: CupertinoIcons.chart_bar_fill,
           iconColor: AppColors.success,
           label: 'Progress Updates',
           value: _progressUpdates,
-          onChanged: (v) => _userCtrl.updateSettings(progressUpdateOn: v),
+          onChanged: (v) async {
+            await _userCtrl.updateSettings(progressUpdateOn: v);
+            await NotificationService.to
+                .rescheduleAllNotifications(_userCtrl.settings.value);
+          },
         ),
         _SwitchRow(
           icon: CupertinoIcons.leaf_arrow_circlepath,
           iconColor: AppColors.accentGold,
           label: 'Diet Reminders',
           value: _dietReminders,
-          onChanged: (v) => _userCtrl.updateSettings(mealReminderOn: v),
+          onChanged: (v) async {
+            await _userCtrl.updateSettings(mealReminderOn: v);
+            await NotificationService.to
+                .rescheduleAllNotifications(_userCtrl.settings.value);
+          },
+        ),
+        _SwitchRow(
+          icon: CupertinoIcons.drop_fill,
+          iconColor: const Color(0xFF4DA6FF),
+          label: 'Water Reminders',
+          value: _waterReminders,
+          onChanged: (v) async {
+            await _userCtrl.updateSettings(waterReminderOn: v);
+            await NotificationService.to
+                .rescheduleAllNotifications(_userCtrl.settings.value);
+          },
         ),
       ],
+    );
+  }
+
+  /// Workout Reminders row with inline time display and tap-to-change.
+  Widget _buildWorkoutReminderRow() {
+    final theme = Theme.of(context);
+    final s = _userCtrl.settings.value;
+    final h = s.workoutReminderHour;
+    final m = s.workoutReminderMinute;
+    final isPm = h >= 12;
+    final displayH = h == 0 ? 12 : (h > 12 ? h - 12 : h);
+    final timeStr =
+        '$displayH:${m.toString().padLeft(2, '0')} ${isPm ? 'PM' : 'AM'}';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: AppColors.accentOrange.withAlpha(18),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: const Icon(
+              CupertinoIcons.bell_fill,
+              color: AppColors.accentOrange,
+              size: 17,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              'Workout Reminders',
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          if (_workoutReminders) ...[
+            GestureDetector(
+              onTap: _showWorkoutTimePicker,
+              child: Text(
+                timeStr,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.accentOrange,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+          CupertinoSwitch(
+            value: _workoutReminders,
+            onChanged: (v) async {
+              await _userCtrl.updateSettings(workoutReminderOn: v);
+              await NotificationService.to
+                  .rescheduleAllNotifications(_userCtrl.settings.value);
+            },
+            activeTrackColor: AppColors.accentOrange,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Time picker bottom sheet for the workout reminder.
+  void _showWorkoutTimePicker() {
+    final s = _userCtrl.settings.value;
+    int tempHour   = s.workoutReminderHour;
+    int tempMinute = s.workoutReminderMinute;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (_) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        return Container(
+          height: 320,
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: (isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight)
+                        .withAlpha(60),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.inter(
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'Workout Time',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _userCtrl.updateSettings(
+                          workoutReminderHour: tempHour,
+                          workoutReminderMinute: tempMinute,
+                        );
+                        await NotificationService.to
+                            .rescheduleAllNotifications(
+                                _userCtrl.settings.value);
+                      },
+                      child: Text(
+                        'Save',
+                        style: GoogleFonts.inter(
+                          color: AppColors.accentOrange,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.time,
+                  initialDateTime:
+                      DateTime(2000, 1, 1, tempHour, tempMinute),
+                  onDateTimeChanged: (dt) {
+                    tempHour   = dt.hour;
+                    tempMinute = dt.minute;
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -937,21 +1123,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                'Upgrade Now',
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.accentOrange,
+          GestureDetector(
+            onTap: () => _showProComingSoonDialog(),
+            child: Container(
+              width: double.infinity,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  'Upgrade Now',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.accentOrange,
+                  ),
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showProComingSoonDialog() {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: const Text('Coming Soon! 🚀'),
+        content: const Text(
+          "FitForge Pro is currently in development. We'll notify you as soon as it's available!",
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Got it!',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                foreground: Paint()
+                  ..shader = const LinearGradient(
+                    colors: [AppColors.accentOrange, AppColors.accentGold],
+                  ).createShader(const Rect.fromLTWH(0, 0, 80, 20)),
               ),
             ),
           ),

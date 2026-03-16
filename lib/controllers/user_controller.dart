@@ -105,6 +105,8 @@ class UserController extends GetxController {
     int? dailyCalorieGoal,
     int? dailyWaterGoal,
     int? dailyStepsGoal,
+    int? workoutReminderHour,
+    int? workoutReminderMinute,
   }) async {
     final s = settings.value;
     try {
@@ -120,6 +122,8 @@ class UserController extends GetxController {
       if (dailyCalorieGoal != null) s.dailyCalorieGoal = dailyCalorieGoal;
       if (dailyWaterGoal != null) s.dailyWaterGoal = dailyWaterGoal;
       if (dailyStepsGoal != null) s.dailyStepsGoal = dailyStepsGoal;
+      if (workoutReminderHour != null) s.workoutReminderHour = workoutReminderHour;
+      if (workoutReminderMinute != null) s.workoutReminderMinute = workoutReminderMinute;
 
       await _hive.saveSettings(s);
       settings.refresh();
