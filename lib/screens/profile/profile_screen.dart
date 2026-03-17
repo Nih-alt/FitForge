@@ -578,48 +578,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ════════════════════════════════════════════════════════════════════════════
 
   Widget _buildNotificationsCard() {
-    return _SettingsCard(
-      children: [
-        _buildWorkoutReminderRow(),
-        _SwitchRow(
-          icon: CupertinoIcons.chart_bar_fill,
-          iconColor: AppColors.success,
-          label: 'Progress Updates',
-          value: _progressUpdates,
-          onChanged: (v) async {
-            await _userCtrl.updateSettings(progressUpdateOn: v);
-            await NotificationService.to
-                .rescheduleAllNotifications(_userCtrl.settings.value);
-          },
-        ),
-        _SwitchRow(
-          icon: CupertinoIcons.leaf_arrow_circlepath,
-          iconColor: AppColors.accentGold,
-          label: 'Diet Reminders',
-          value: _dietReminders,
-          onChanged: (v) async {
-            await _userCtrl.updateSettings(mealReminderOn: v);
-            await NotificationService.to
-                .rescheduleAllNotifications(_userCtrl.settings.value);
-          },
-        ),
-        _SwitchRow(
-          icon: CupertinoIcons.drop_fill,
-          iconColor: const Color(0xFF4DA6FF),
-          label: 'Water Reminders',
-          value: _waterReminders,
-          onChanged: (v) async {
-            await _userCtrl.updateSettings(waterReminderOn: v);
-            await NotificationService.to
-                .rescheduleAllNotifications(_userCtrl.settings.value);
-          },
-        ),
-      ],
-    );
+    return Obx(() {
+      final permitted = NotificationService.to.hasNotificationPermission.value;
+      return _SettingsCard(
+        children: [
+          if (!permitted)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'Notifications are disabled. Enable them in system settings.',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.error,
+                ),
+              ),
+            ),
+          _buildWorkoutReminderRow(enabled: permitted),
+          _SwitchRow(
+            icon: CupertinoIcons.chart_bar_fill,
+            iconColor: AppColors.success,
+            label: 'Progress Updates',
+            value: permitted && _progressUpdates,
+            onChanged: permitted
+                ? (v) async {
+                    await _userCtrl.updateSettings(progressUpdateOn: v);
+                    await NotificationService.to
+                        .rescheduleAllNotifications(_userCtrl.settings.value);
+                  }
+                : (_) {},
+          ),
+          _SwitchRow(
+            icon: CupertinoIcons.leaf_arrow_circlepath,
+            iconColor: AppColors.accentGold,
+            label: 'Diet Reminders',
+            value: permitted && _dietReminders,
+            onChanged: permitted
+                ? (v) async {
+                    await _userCtrl.updateSettings(mealReminderOn: v);
+                    await NotificationService.to
+                        .rescheduleAllNotifications(_userCtrl.settings.value);
+                  }
+                : (_) {},
+          ),
+          _SwitchRow(
+            icon: CupertinoIcons.drop_fill,
+            iconColor: const Color(0xFF4DA6FF),
+            label: 'Water Reminders',
+            value: permitted && _waterReminders,
+            onChanged: permitted
+                ? (v) async {
+                    await _userCtrl.updateSettings(waterReminderOn: v);
+                    await NotificationService.to
+                        .rescheduleAllNotifications(_userCtrl.settings.value);
+                  }
+                : (_) {},
+          ),
+        ],
+      );
+    });
   }
 
   /// Workout Reminders row with inline time display and tap-to-change.
-  Widget _buildWorkoutReminderRow() {
+  Widget _buildWorkoutReminderRow({bool enabled = true}) {
     final theme = Theme.of(context);
     final s = _userCtrl.settings.value;
     final h = s.workoutReminderHour;
@@ -657,7 +677,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          if (_workoutReminders) ...[
+          if (enabled && _workoutReminders) ...[
             GestureDetector(
               onTap: _showWorkoutTimePicker,
               child: Text(
@@ -672,12 +692,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 10),
           ],
           CupertinoSwitch(
-            value: _workoutReminders,
-            onChanged: (v) async {
-              await _userCtrl.updateSettings(workoutReminderOn: v);
-              await NotificationService.to
-                  .rescheduleAllNotifications(_userCtrl.settings.value);
-            },
+            value: enabled && _workoutReminders,
+            onChanged: enabled
+                ? (v) async {
+                    await _userCtrl.updateSettings(workoutReminderOn: v);
+                    await NotificationService.to
+                        .rescheduleAllNotifications(_userCtrl.settings.value);
+                  }
+                : (_) {},
             activeTrackColor: AppColors.accentOrange,
           ),
         ],
